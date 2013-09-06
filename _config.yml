@@ -2,12 +2,12 @@
 #      Main Configs       #
 # ----------------------- #
 
-url: http://yoursite.com
-title: My Octopress Blog
-subtitle: A blogging framework for hackers.
-author: Your Name
+url: http://rogelio.mx
+title: Learn Flight.js
+subtitle: The easiest place to learn Flight by examples
+author: Rogelio Guzman
 simple_search: http://google.com/search
-description:
+description: The easiest place to learn Flight by examples
 
 # Default date format is "ordinal" (resulting in "July 22nd 2007")
 # You can customize the format as defined in
@@ -19,7 +19,7 @@ date_format: "ordinal"
 subscribe_rss: /atom.xml
 subscribe_email:
 # RSS feeds can list your email address if you like
-email:
+email: chinog9@gmail.com
 
 # ----------------------- #
 #    Jekyll & Plugins     #
