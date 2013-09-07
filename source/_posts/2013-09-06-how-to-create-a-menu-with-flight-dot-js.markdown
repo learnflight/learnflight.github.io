@@ -40,7 +40,7 @@ Once installed it we should a `bower.json` file and a `bower_components` dir
 We are going to create an `index.html` file in our directory that will have a
 simple page.
 
-```html
+{% codeblock index.html lang:html %}
 <html>
   <head>
     <link rel="stylesheet" href="css/main.css">
@@ -60,15 +60,14 @@ simple page.
     </div>
   </body>
 </html>
-```
+{% endcodeblock %}
+
 
 ### Paste some CSS
 
 We also need to paste some CSS to make it a look a bit sexier
 
-Save it on `css/main.css`
-
-```css
+{% codeblock css/main.css lang:css %}
 body {
   font: 15px/1.3 'Open Sans', sans-serif;
   color: #5e5b64;
@@ -110,7 +109,7 @@ body {
   background-color:#c4d7e0;
   text-transform: uppercase;
 }
-```
+{% endcodeblock %}
 
 # Lets start
 
@@ -118,16 +117,17 @@ We have one last "setup" duty to make.
 
 First we need to add the `require.js` file
 
-```html
+{% codeblock index.html lang:html %}
 <script src="bower_components/requirejs/require.js" data-main="js/main.js"></script>
-```
+{% endcodeblock %}
+
 
 This file will reference our main js file
 
 Save it on `js/main.js`
 
 
-```javascript
+{% codeblock js/main.js lang:js %}
 'use strict';
 
 requirejs.config({
@@ -157,25 +157,24 @@ require(
     });
   }
 );
-```
+{% endcodeblock %}
 
 ## Create the components
 
 Now we can start by creating our components. In this case we are going to create
 three of them.
 
-* **js/menu_item.js** Listens to clicks on the menu items and triggers a
+* **menu_item.js** Listens to clicks on the menu items and triggers a
   `uiMenuContentRefreshRequested` event to notify that we need to change the
   content
-* **js/menu.js** Listens to the `uiMenuContentRefreshServed` event and adds the
+* **menu.js** Listens to the `uiMenuContentRefreshServed` event and adds the
   apropiate class to the menu.
-* **js/menu_content.js** Listens to `uiMenuContentRefreshRequested`, updates the content
+* **menu_content.js** Listens to `uiMenuContentRefreshRequested`, updates the content
   with the apporopiate markup and triggers a `uiMenuContentRefreshServed` to
   notify that content changed
 
 
-`js/menu_item.js`
-```javascript
+{% codeblock js/component/menu_item.js lang:js %}
 define(function (require) {
   'use strict';
 
@@ -197,11 +196,9 @@ define(function (require) {
     });
   }
 });
-```
+{% endcodeblock %}
 
-`js/menu.js`
-
-```javascript
+{% codeblock js/component/menu.js lang:js %}
 define(function (require) {
   'use strict';
 
@@ -219,11 +216,9 @@ define(function (require) {
     });
   }
 });
-```
+{% endcodeblock %}
 
-`js/menu_content.js`
-```javascript
-
+{% codeblock js/component/menu_content.js lang:js %}
 define(function (require) {
   'use strict';
 
@@ -242,7 +237,7 @@ define(function (require) {
     });
   }
 });
-```
+{% endcodeblock %}
 
 ## Attach the components to the page
 
@@ -254,7 +249,7 @@ them.
 * **menu** is attached to the whole menu
 * **menuContent** is attached to the menu content
 
-```javascript
+{% codeblock js/page/default.js lang:js %}
 define(function (require) {
   'use strict';
 
@@ -270,7 +265,7 @@ define(function (require) {
     menuContent.attachTo('.menu-content');
   }
 });
-```
+{% endcodeblock %}
 
 ## Wrap up
 
