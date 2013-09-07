@@ -15,7 +15,7 @@ if you want to check them out.
 
 {% img /images/navigation-menu.png %}
 
-[View source]() or [Live demo]().
+[View source](https://github.com/rogeliog/learn-flight-navigation-menu-demo/tree/gh-pages) or [Live demo](http://rogeliog.github.io/learn-flight-navigation-menu-demo).
 
 # Initial Setup
 
