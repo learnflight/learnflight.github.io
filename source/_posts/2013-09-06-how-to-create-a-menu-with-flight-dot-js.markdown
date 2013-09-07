@@ -8,18 +8,18 @@ categories:
 
 We are going to create a simple navigation menu with
 [Flight.js](http://flightjs.github.io/). The purpose of
-this post is to ilustrate a practical Flight.js example. Here are the
+this post is to illustrate a practical Flight.js example. Here are the
 [docs](https://github.com/flightjs/flight/tree/master/doc) and the [github
 page](https://github.com/flightjs/flight)
 if you want to check them out.
 
 {% img /images/navigation-menu.png %}
 
-[View source]() or [Live demo]()
+[View source]() or [Live demo]().
 
 # Initial Setup
 
-We need to setup some boring stuff to be sure that we all have the same begining
+We need to setup some boring stuff to be sure that we all have the same beginning
 state. The fun stuff starts in the next section.
 
 Before we start be sure to have installed [npm]() and [bower]().
@@ -58,6 +58,8 @@ simple page.
         Please click a menu item
       </div>
     </div>
+    <script src="bower_components/jquery/jquery.js"></script>
+    <script src="bower_components/requirejs/require.js" data-main="js/main.js"></script>
   </body>
 </html>
 {% endcodeblock %}
@@ -65,7 +67,7 @@ simple page.
 
 ### Paste some CSS
 
-We also need to paste some CSS to make it a look a bit sexier
+We also need to paste some CSS to make it a look a bit sexier.
 
 {% codeblock css/main.css lang:css %}
 body {
@@ -113,19 +115,15 @@ body {
 
 # Lets start
 
-We have one last "setup" duty to make.
-
-First we need to add the `require.js` file
+We have one last "setup" duty to make. The `index.html` file has this line
 
 {% codeblock index.html lang:html %}
 <script src="bower_components/requirejs/require.js" data-main="js/main.js"></script>
 {% endcodeblock %}
 
-
-This file will reference our main js file
-
-Save it on `js/main.js`
-
+This line will reference and include our `js/main.js` file. In this file we need
+to tell require.js that we are using the flight module and load the default
+page.
 
 {% codeblock js/main.js lang:js %}
 'use strict';
@@ -161,18 +159,13 @@ require(
 
 ## Create the components
 
-Now we can start by creating our components. In this case we are going to create
-three of them.
+Now we can start creating our components. In this case we are going to create
+three of them, one for the menu items, one for the menu content and one that
+will wrap the menu.
 
-* **menu_item.js** Listens to clicks on the menu items and triggers a
+**menu_item.js** Listens to clicks on the menu items and triggers a
   `uiMenuContentRefreshRequested` event to notify that we need to change the
-  content
-* **menu.js** Listens to the `uiMenuContentRefreshServed` event and adds the
-  apropiate class to the menu.
-* **menu_content.js** Listens to `uiMenuContentRefreshRequested`, updates the content
-  with the apporopiate markup and triggers a `uiMenuContentRefreshServed` to
-  notify that content changed
-
+  content.
 
 {% codeblock js/component/menu_item.js lang:js %}
 define(function (require) {
@@ -198,6 +191,9 @@ define(function (require) {
 });
 {% endcodeblock %}
 
+**menu.js** Listens to the `uiMenuContentRefreshServed` event and adds the
+  apropiate class to the menu.
+
 {% codeblock js/component/menu.js lang:js %}
 define(function (require) {
   'use strict';
@@ -217,6 +213,10 @@ define(function (require) {
   }
 });
 {% endcodeblock %}
+
+**menu_content.js** Listens to `uiMenuContentRefreshRequested`, updates the content
+  with the appropiate markup and triggers a `uiMenuContentRefreshServed` to
+  notify that content changed.
 
 {% codeblock js/component/menu_content.js lang:js %}
 define(function (require) {
@@ -245,9 +245,9 @@ We have created our components but right now they are just isolated modules, so
 we need to create a page and attach them to it so that we can interact with
 them.
 
-* **menuItem** is attached to each menu item
-* **menu** is attached to the whole menu
-* **menuContent** is attached to the menu content
+* **menuItem** is attached to each menu item.
+* **menu** is attached to the whole menu.
+* **menuContent** is attached to the menu content.
 
 {% codeblock js/page/default.js lang:js %}
 define(function (require) {
@@ -269,9 +269,8 @@ define(function (require) {
 
 ## Wrap up
 
-By now you should be able to open you index.html file on your browser and be
-able to interact with your menu!
+By now you should be able to open the `index.html` file on your browser and interact with your menu!
 
 The way that our menu was created makes it easy to customize and update from
-different places. Because of the decoupleness of our components we have a pretty
+different places. Because of the "decoupleness" of our components we have a pretty
 flexible and reusable menu.
