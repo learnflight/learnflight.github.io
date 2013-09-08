@@ -29,14 +29,16 @@ Lets create a new folder for our project. Inside our folder lets setup our proje
 We are going to use the generator-flight yeoman generator to create the basic scaffold for our application.
 
 {% codeblock lang:bash %}
+# might need sudo
 npm install -g generator-flight
 {% endcodeblock %}
 
 This will install the appropiate yeoman generator and now we can create our app
 
 {% codeblock lang:bash %}
-yo flight app
+yo flight
 {% endcodeblock %}
+_NOTE: we don't neeed Normalize.css or Bootstrap.css_
 
 Once we have the basic scaffold we can add some markup and styles
 
@@ -105,6 +107,17 @@ body {
   text-transform: uppercase;
 }
 {% endcodeblock %}
+
+### Run the app
+
+Lets run the app to be sure that everything is wired up properly.
+{% codeblock lang:bash %}
+# might need sudo
+npm install -g http-server
+cd app && http-server
+{% endcodeblock %}
+```
+Visit [localhost:8080](http://localhost:8080)
 
 # Create the components
 
