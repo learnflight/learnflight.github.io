@@ -25,43 +25,36 @@ state. The fun stuff starts in the next section.
 Before we start be sure to have installed [npm]() and [bower]().
 
 Lets create a new folder for our project. Inside our folder lets setup our project.
-We need to install Flight and requirejs to load the modules.
 
-```bash
-bower init
-bower install flight --save
-bower install requirejs --save
-```
+We are going to use the generator-flight yeoman generator to create the basic scaffold for our application.
 
-Once installed it we should a `bower.json` file and a `bower_components` dir
+{% codeblock lang:bash %}
+npm install -g generator-flight
+{% endcodeblock %}
+
+This will install the appropiate yeoman generator and now we can create our app
+
+{% codeblock lang:bash %}
+yo flight app
+{% endcodeblock %}
+
+Once we have the basic scaffold we can add some markup and styles
 
 ### Add the markup
 
-We are going to create an `index.html` file in our directory that will have a
-simple page.
+{% codeblock app/index.html lang:html %}
+<div id="main">
+  <nav id="menu">
+    <a href="#" class="home menu-item">Home</a>
+    <a href="#" class="projects menu-item">Projects</a>
+    <a href="#" class="services menu-item">Services</a>
+    <a href="#" class="contact menu-item">Contact</a>
+  </nav>
 
-{% codeblock index.html lang:html %}
-<html>
-  <head>
-    <link rel="stylesheet" href="css/main.css">
-  </head>
-  <body>
-    <div id="main">
-      <nav id="menu">
-        <a href="#" class="home menu-item">Home</a>
-        <a href="#" class="projects menu-item">Projects</a>
-        <a href="#" class="services menu-item">Services</a>
-        <a href="#" class="contact menu-item">Contact</a>
-      </nav>
-
-      <div class="menu-content">
-        Please click a menu item
-      </div>
-    </div>
-    <script src="bower_components/jquery/jquery.js"></script>
-    <script src="bower_components/requirejs/require.js" data-main="js/main.js"></script>
-  </body>
-</html>
+  <div class="menu-content">
+    Please click a menu item
+  </div>
+</div>
 {% endcodeblock %}
 
 
@@ -69,7 +62,7 @@ simple page.
 
 We also need to paste some CSS to make it a look a bit sexier.
 
-{% codeblock css/main.css lang:css %}
+{% codeblock app/css/main.css lang:css %}
 body {
   font: 15px/1.3 'Open Sans', sans-serif;
   color: #5e5b64;
@@ -94,7 +87,7 @@ body {
   -webkit-transition:background-color 0.20s;
   -moz-transition:background-color 0.20s;
   transition:background-color 0.20s;
-}
+}
 
 #menu.home .home,
 #menu.projects .projects,
@@ -113,51 +106,7 @@ body {
 }
 {% endcodeblock %}
 
-# Lets start
-
-We have one last "setup" duty to make. The `index.html` file has this line
-
-{% codeblock index.html lang:html %}
-<script src="bower_components/requirejs/require.js" data-main="js/main.js"></script>
-{% endcodeblock %}
-
-This line will reference and include our `js/main.js` file. In this file we need
-to tell require.js that we are using the flight module and load the default
-page.
-
-{% codeblock js/main.js lang:js %}
-'use strict';
-
-requirejs.config({
-  baseUrl: '',
-  paths: {
-    'flight': 'bower_components/flight',
-    'component': 'js/component',
-    'page': 'js/page'
-  }
-});
-
-require(
-  [
-    'flight/lib/compose',
-    'flight/lib/registry',
-    'flight/lib/advice',
-    'flight/lib/logger',
-    'flight/lib/debug'
-  ],
-
-  function(compose, registry, advice, withLogging, debug) {
-    debug.enable(true);
-    compose.mixin(registry, [advice.withAdvice, withLogging]);
-
-    require(['page/default'], function(initializeDefault) {
-      initializeDefault();
-    });
-  }
-);
-{% endcodeblock %}
-
-## Create the components
+# Create the components
 
 Now we can start creating our components. In this case we are going to create
 three of them, one for the menu items, one for the menu content and one that
@@ -167,7 +116,7 @@ will wrap the menu.
   `uiMenuContentRefreshRequested` event to notify that we need to change the
   content.
 
-{% codeblock js/component/menu_item.js lang:js %}
+{% codeblock app/js/component/menu_item.js lang:js %}
 define(function (require) {
   'use strict';
 
@@ -194,7 +143,7 @@ define(function (require) {
 **menu.js** Listens to the `uiMenuContentRefreshServed` event and adds the
   apropiate class to the menu.
 
-{% codeblock js/component/menu.js lang:js %}
+{% codeblock app/js/component/menu.js lang:js %}
 define(function (require) {
   'use strict';
 
@@ -204,7 +153,8 @@ define(function (require) {
 
   function menu() {
     this.setSelectedClass = function (e, data) {
-      this.$node.removeClass().addClass(data.section);
+      var className = data.section.toLowerCase()
+      this.$node.removeClass().addClass(className);
     }
 
     this.after('initialize', function () {
@@ -218,7 +168,7 @@ define(function (require) {
   with the appropiate markup and triggers a `uiMenuContentRefreshServed` to
   notify that content changed.
 
-{% codeblock js/component/menu_content.js lang:js %}
+{% codeblock app/js/component/menu_content.js lang:js %}
 define(function (require) {
   'use strict';
 
@@ -249,7 +199,7 @@ them.
 * **menu** is attached to the whole menu.
 * **menuContent** is attached to the menu content.
 
-{% codeblock js/page/default.js lang:js %}
+{% codeblock app/js/page/default.js lang:js %}
 define(function (require) {
   'use strict';
 
