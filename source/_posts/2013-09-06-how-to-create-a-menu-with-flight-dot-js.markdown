@@ -22,11 +22,11 @@ if you want to check them out.
 We need to setup some boring stuff to be sure that we all have the same beginning
 state. The fun stuff starts in the next section.
 
-Before we start be sure to have installed [npm]() and [bower]().
+Before we start be sure to have installed [npm](https://npmjs.org/) and [bower](http://bower.io/).
 
 Lets create a new folder for our project. Inside our folder lets setup our project.
 
-We are going to use the generator-flight yeoman generator to create the basic scaffold for our application.
+We are going to use the [generator-flight](https://github.com/flightjs/generator-flight) yeoman generator to create the basic scaffold for our application.
 
 {% codeblock lang:bash %}
 # might need sudo
@@ -125,6 +125,8 @@ Visit [localhost:8080](http://localhost:8080)
 Now we can start creating our components. In this case we are going to create
 three of them.
 
+* One for the *menu title*, another for the *menu content* and third one for *generating the data* that will be presented in the menu
+
 The first two components will be **ui components**, this means that we are going
 to attach them to a DOM element and they will manipulate it.
 
@@ -136,7 +138,7 @@ a given section.
 
   * Listens to clicks on the `.menu-items` and triggers a `uiNeedsMenuSection`
   event to notify that we need to change the menu section.
-  * Listens to `dataMenuSection` and adds the appropiate class to highlight the `.menu-item`
+  * Listens to the `dataMenuSection` event sent from a data component, adds the appropiate class to highlight the `.menu-item`
 
 {% codeblock app/js/component/ui/menu_title.js lang:js %}
 define(function (require) {
@@ -172,9 +174,9 @@ define(function (require) {
 });
 {% endcodeblock %}
 
-**ui/menu_content.js** It only knows how to replace the content of the menu given a markup
+**ui/menu_content.js** It only knows how to replace the content given a markup
 
-  * Listens to `dataMenuSection`, updates the content with the appropriate markup notify that content changed.
+  * Listens to the `dataMenuSection` event, updates the content with the appropriate markup notify that content changed.
 
 Note how it doesn't know anything about the `ui/menu_title.js` component or
 that the content needs to be changed because a menu section was clicked.
@@ -204,7 +206,7 @@ define(function (require) {
   * Listens to the `uiNeedsMenuSection` event and triggers a `dataMenuSection` to
   notify components that there is new content available for the menu.
 
-In this component you can create a `renderSection` function that will render a mustache template
+In this component you can create a `renderSection` function that will render a [mustache](http://mustache.github.io/) template
 for that given section or even get some some data from the backend.
 
 {% codeblock app/js/component/data/menu_section.js lang:js %}
@@ -236,8 +238,8 @@ We have created our components but right now they are just isolated modules, so
 we need to create a page and attach them to it so that we can interact with
 them.
 
-* **menuTitleUI**: it is attached to each menu item.
-* **menuContentUI**: it is attached to the menu content.
+* **menuTitleUI**: attached to each menu item.
+* **menuContentUI**: attached to the menu content.
 * **menuSectionData**: it is a data component so it will be attached to the document.
 
 {% codeblock app/js/page/default.js lang:js %}
