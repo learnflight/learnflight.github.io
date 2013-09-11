@@ -111,77 +111,75 @@ body {
 ### Run the app
 
 Lets run the app to be sure that everything is wired up properly.
+
 {% codeblock lang:bash %}
 # might need sudo
 npm install -g http-server
 cd app && http-server
 {% endcodeblock %}
-```
+
 Visit [localhost:8080](http://localhost:8080)
 
 # Create the components
 
 Now we can start creating our components. In this case we are going to create
-three of them, one for the menu items, one for the menu content and one that
-will wrap the menu.
+three of them.
 
-**menu_item.js** Listens to clicks on the menu items and triggers a
-  `uiMenuContentRefreshRequested` event to notify that we need to change the
-  content.
+The first two components will be **ui components**, this means that we are going
+to attach them to a DOM element and they will manipulate it.
 
-{% codeblock app/js/component/menu_item.js lang:js %}
+The third component is a **data component**. This component doesn't know about the DOM state or the menu.
+It will only be generating the "backend" response with the appropiate content for
+a given section.
+
+**ui/menu_item.js** This is the most complex component. It only knows about the menu title
+
+  * Listens to clicks on the `.menu-items` and triggers a `uiNeedsMenuSection`
+  event to notify that we need to change the menu section.
+  * Listens to `dataMenuSection` and adds the appropiate class to highlight the `.menu-item`
+
+{% codeblock app/js/component/ui/menu_title.js lang:js %}
 define(function (require) {
   'use strict';
 
   var defineComponent = require('flight/lib/component');
 
-  return defineComponent(menuItem);
+  return defineComponent(menuItems);
 
-  function menuItem() {
-    this.select = function (e) {
-      var value = this.$node.text();
-      this.trigger('uiMenuContentRefreshRequested', {
-        section: value,
-        markup: '<b>' + value + '</b>'
+  function menuItems() {
+    this.defaultAttrs({
+      itemSelector: '.menu-item'
+    });
+
+    this.highlightSection = function (e, data) {
+      this.$node.removeClass().addClass(data.section);
+    }
+
+    this.requestSectionChange = function (e) {
+      this.trigger('uiNeedsMenuSection', {
+        section: $(e.target).text().toLowerCase()
       });
     }
 
     this.after('initialize', function () {
-      this.on('click', this.select);
+      this.on('click', {
+        itemSelector: this.requestSectionChange
+      });
+
+      this.on(document, 'dataMenuSection', this.highlightSection);
     });
   }
 });
 {% endcodeblock %}
 
-**menu.js** Listens to the `uiMenuContentRefreshServed` event and adds the
-  apropiate class to the menu.
+**ui/menu_content.js** It only knows how to replace the content of the menu given a markup
 
-{% codeblock app/js/component/menu.js lang:js %}
-define(function (require) {
-  'use strict';
+  * Listens to `dataMenuSection`, updates the content with the appropriate markup notify that content changed.
 
-  var defineComponent = require('flight/lib/component');
+Note how it doesn't know anything about the `ui/menu_title.js` component or
+that the content needs to be changed because a menu section was clicked.
 
-  return defineComponent(menu);
-
-  function menu() {
-    this.setSelectedClass = function (e, data) {
-      var className = data.section.toLowerCase()
-      this.$node.removeClass().addClass(className);
-    }
-
-    this.after('initialize', function () {
-      this.on(document, 'uiMenuContentRefreshServed', this.setSelectedClass);
-    });
-  }
-});
-{% endcodeblock %}
-
-**menu_content.js** Listens to `uiMenuContentRefreshRequested`, updates the content
-  with the appropiate markup and triggers a `uiMenuContentRefreshServed` to
-  notify that content changed.
-
-{% codeblock app/js/component/menu_content.js lang:js %}
+{% codeblock app/js/component/ui/menu_content.js lang:js %}
 define(function (require) {
   'use strict';
 
@@ -192,11 +190,41 @@ define(function (require) {
   function menuContent() {
     this.setText = function (e, data) {
       this.$node.html(data.markup);
-      this.trigger('uiMenuContentRefreshServed', data);
     }
 
     this.after('initialize', function () {
-      this.on(document, 'uiMenuContentRefreshRequested', this.setText);
+      this.on(document, 'dataMenuSection', this.setText);
+    });
+  }
+});
+{% endcodeblock %}
+
+**data/menu_section.js** This component knows how to get the appropiate data for any section.
+
+  * Listens to the `uiNeedsMenuSection` event and triggers a `dataMenuSection` to
+  notify components that there is new content available for the menu.
+
+In this component you can create a `renderSection` function that will render a mustache template
+for that given section or even get some some data from the backend.
+
+{% codeblock app/js/component/data/menu_section.js lang:js %}
+define(function (require) {
+  'use strict';
+
+  var defineComponent = require('flight/lib/component');
+
+  return defineComponent(menuSection);
+
+  function menuSection() {
+    this.changeSection = function (e, data) {
+      this.trigger('dataMenuSection', {
+        section: data.section,
+        markup: '<b>' + data.section + '</b>'
+      });
+    }
+
+    this.after('initialize', function () {
+      this.on('uiNeedsMenuSection', this.changeSection);
     });
   }
 });
@@ -208,32 +236,35 @@ We have created our components but right now they are just isolated modules, so
 we need to create a page and attach them to it so that we can interact with
 them.
 
-* **menuItem** is attached to each menu item.
-* **menu** is attached to the whole menu.
-* **menuContent** is attached to the menu content.
+* **menuTitleUI**: it is attached to each menu item.
+* **menuContentUI**: it is attached to the menu content.
+* **menuSectionData**: it is a data component so it will be attached to the document.
 
 {% codeblock app/js/page/default.js lang:js %}
 define(function (require) {
   'use strict';
 
-  var menuItem = require('component/menu_item');
-  var menuContent = require('component/menu_content');
-  var menu = require('component/menu');
+  var menuTitleUI = require('component/ui/menu_title');
+  var menuContentUI = require('component/ui/menu_content');
+  var menuSectionData = require('component/data/menu_section');
 
   return initialize;
 
   function initialize() {
-    menu.attachTo('#menu');
-    menuItem.attachTo('.menu-item');
-    menuContent.attachTo('.menu-content');
+    menuTitleUI.attachTo('#menu');
+    menuContentUI.attachTo('.menu-content');
+
+    menuSectionData.attachTo(document)
   }
 });
 {% endcodeblock %}
 
 ## Wrap up
 
-By now you should be able to open the `index.html` file on your browser and interact with your menu!
+By now you should be able to run your server and interact with your menu!
 
-The way that our menu was created makes it easy to customize and update from
-different places. Because of the "decoupleness" of our components we have a pretty
-flexible and reusable menu.
+It is important to notice how decoupled each component is from each other.
+Because that "decoupleness" of our components we have a pretty flexible and reusable menu.
+
+
+*NOTE: English is not my native language, I'll be more than happy to receive any grammar or spelling corrections :)*
