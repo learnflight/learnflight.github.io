@@ -91,7 +91,7 @@ body {
 
 #content {
   overflow: hidden;
-  > div, > article { width: $article-max-width; }
+  > div, > article { width: 100%; }
 }
 
 aside.sidebar {
@@ -186,6 +186,6 @@ body.sidebar-footer {
 
 @if $indented-lists == false {
   @media only screen and (min-width: 768px) {
-    ul, ol { margin-left: $list-margin; }
+    ul, ol { margin-left: 0; }
   }
 }
