@@ -1,9 +1,12 @@
 body > header {
+  margin: 0 auto;
+  width: 50%;
+  min-width: 500px;
   padding-left:0;
   h1 {
     display: inline-block;
     margin: 0;
-    font-size: 2.7em;
+    font-size: 3.7em;
     padding-left: 0.1em;
     text-shadow: rgba(0, 0, 0, 0.8) 0 0 8px;
     float: left;
@@ -21,9 +24,11 @@ body > header {
     }
   }
   div#logo{
-    margin-top: 0.58em;
     font-size: 1.9em;
     color: #f9f9f9;
+  }
+  div#logo img {
+    width: 80px;
   }
   div#logoText{
     color: #f1f1f1;
