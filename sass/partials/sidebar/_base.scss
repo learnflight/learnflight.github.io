@@ -9,6 +9,7 @@ aside.sidebar {
   -moz-border-radius-topright: 0.4em;
   -webkit-border-radius: 0 0.4em 0 0;
   border-radius: 0 0.4em 0 0;
+  border: $sidebar-border-override;
   a { 
     @extend .force-wrap; 
     text-decoration: none; 
@@ -79,7 +80,7 @@ ul#gh_repos > li > a{
   .toggle-sidebar {
     outline: none;
     position: absolute; right: -10px; top: 0; bottom: 0;
-    display: inline-block;
+    display: $sidebar-toggle-display;
     text-decoration: none;
     color: mix($text-color-light, $sidebar-bg);
     width: 9px;
