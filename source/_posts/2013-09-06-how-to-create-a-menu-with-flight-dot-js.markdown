@@ -6,27 +6,17 @@ comments: true
 categories:
 ---
 
-We are going to create a simple navigation menu with
-[Flight.js](http://flightjs.github.io/). The purpose of
-this post is to illustrate a practical Flight.js example. Here are the
-[docs](https://github.com/flightjs/flight/tree/master/doc) and the [github
-page](https://github.com/flightjs/flight)
-if you want to check them out.
+We are going to create a simple navigation menu with [Flight.js](http://flightjs.github.io/). The purpose of this post is to illustrate a practical Flight.js example. Here are the [docs](https://github.com/flightjs/flight/tree/master/doc) and the [github page](https://github.com/flightjs/flight) if you want to check them out.
 
-{% img /images/navigation-menu.png %}
+{% img center /images/navigation-menu.png %}
 
-[View source](https://github.com/rogeliog/learn-flight-navigation-menu-demo/tree/gh-pages) or [Live demo](http://rogeliog.github.io/learn-flight-navigation-menu-demo).
+[View source](https://github.com/rogeliog/learn-flight-navigation-menu-demo/tree/master/app) or [Live demo](http://rogeliog.github.io/learn-flight-navigation-menu-demo).
 
 # Initial Setup
 
-We need to setup some boring stuff to be sure that we all have the same beginning
-state. The fun stuff starts in the next section.
+We need to setup some boring stuff to be sure that we all have the same beginning state. The fun stuff starts in the next section.
 
-Before we start be sure to have installed [npm](https://npmjs.org/) and [bower](http://bower.io/).
-
-Lets create a new folder for our project. Inside our folder lets setup our project.
-
-We are going to use the [generator-flight](https://github.com/flightjs/generator-flight) yeoman generator to create the basic scaffold for our application.
+Before we start be sure to have installed [npm](https://npmjs.org/) and [bower](http://bower.io/). Lets create a new folder for our project. Inside our folder lets setup our project. We are going to use the [generator-flight](https://github.com/flightjs/generator-flight) yeoman generator to create the basic scaffold for our application.
 
 {% codeblock lang:bash %}
 # might need sudo
