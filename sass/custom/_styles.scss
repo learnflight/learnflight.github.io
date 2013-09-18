@@ -1,2 +1,18 @@
 // This File is imported last, and will override other styles in the cascade
 // Add styles here to make changes without digging in too much
+
+.social-menu {
+  margin: 0;
+  list-style: none;
+  padding: 1em;
+}
+
+.top-right-corner {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.social-menu .social-menu-item img {
+  width: 40px;
+}
