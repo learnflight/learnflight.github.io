@@ -105,7 +105,7 @@ Lets run the app to be sure that everything is wired up properly.
 {% codeblock lang:bash %}
 # might need sudo
 npm install -g http-server
-cd app && http-server
+http-server app
 {% endcodeblock %}
 
 Visit [localhost:8080](http://localhost:8080)
