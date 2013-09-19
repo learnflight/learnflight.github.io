@@ -12,6 +12,8 @@ We are going to create a simple navigation menu with [Flight.js](http://flightjs
 
 [View source](https://github.com/rogeliog/learn-flight-navigation-menu-demo/tree/master/app) or [Live demo](http://rogeliog.github.io/learn-flight-navigation-menu-demo).
 
+<!-- more -->
+
 # Initial Setup
 
 We need to setup some boring stuff to be sure that we all have the same beginning state. The fun stuff starts in the next section.
