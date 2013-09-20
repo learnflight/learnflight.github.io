@@ -20,17 +20,17 @@ We need to setup some boring stuff to be sure that we all have the same beginnin
 
 Before we start be sure to have installed [npm](https://npmjs.org/) and [bower](http://bower.io/). Lets create a new folder for our project. Inside our folder lets setup our project. We are going to use the [generator-flight](https://github.com/flightjs/generator-flight) yeoman generator to create the basic scaffold for our application.
 
+This will install the appropiate yeoman generator and now we can create our app.
+
 {% codeblock lang:bash %}
 # might need sudo
 npm install -g generator-flight
 {% endcodeblock %}
 
-This will install the appropiate yeoman generator and now we can create our app
-
 {% codeblock lang:bash %}
+# NOTE: we don't neeed Normalize.css or Bootstrap.css
 yo flight
 {% endcodeblock %}
-_NOTE: we don't neeed Normalize.css or Bootstrap.css_
 
 Once we have the basic scaffold we can add some markup and styles
 
