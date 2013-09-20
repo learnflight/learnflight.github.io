@@ -28,7 +28,7 @@ npm install -g generator-flight
 {% endcodeblock %}
 
 {% codeblock lang:bash %}
-# NOTE: we don't neeed Normalize.css or Bootstrap.css
+# NOTE: we don't need Normalize.css or Bootstrap.css
 yo flight
 {% endcodeblock %}
 
