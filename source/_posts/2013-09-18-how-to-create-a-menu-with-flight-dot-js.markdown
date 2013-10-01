@@ -14,7 +14,7 @@ We are going to create a simple navigation menu with [Flight.js](http://flightjs
 
 <!-- more -->
 
-# Initial Setup
+## Initial Setup
 
 We need to setup some boring stuff to be sure that we all have the same beginning state. The fun stuff starts in the next section.
 
@@ -112,7 +112,7 @@ http-server app
 
 Visit [localhost:8080](http://localhost:8080)
 
-# Create the components
+## Create the components
 
 Now we can start creating our components. In this case we are going to create
 three of them.
