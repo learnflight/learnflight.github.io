@@ -13,11 +13,13 @@ As of today the best to way of testing Flight is with [jasmine-flight](https://g
 
 For this post we are going to use a really simple to-do app. A to-do app will generally need a component that handles the data, which responsibility is to add/remove items, and notify other components about that.
 
-# Flight testing principles (optional)
+## Flight testing principles (optional)
 
 Flight components are only able to communicate via events, so we are going focus on testing only events and not the methods inside the component.
 
 Here is a general rule of thumb for testing a Flight component.
+
+<!-- more -->
 
 #### Do test
 
@@ -31,11 +33,11 @@ Here is a general rule of thumb for testing a Flight component.
 * **Methods**: The internal methods that are called when listening or triggering events.
 * **Internal state**: Any component state that is not part of the `this.attr` property.
 
-## Setup
+### Setup
 
 In this case we are going to be using jasmine-flight, you might want to go and [set it up](https://github.com/flightjs/jasmine-flight#getting-started).
 
-# Testing data components
+## Testing data components
 
 Some important things to remember about data components are:
 
