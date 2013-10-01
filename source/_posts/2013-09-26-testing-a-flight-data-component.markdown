@@ -11,11 +11,11 @@ Testing components in Flight is damn fun. This is because, by nature, they are f
 
 As of today the best to way of testing Flight is with [jasmine-flight](https://github.com/flightjs/jasmine-flight) or [mocha-flight](https://github.com/flightjs/mocha-flight), which are extensions to Jasmine and Mocha respectively.
 
-For this post we are going to use a really simple to-do app. A to-do app will generally need a component that handles the data, which responsability is to add/remove items, and notify other components about that.
+For this post we are going to use a really simple to-do app. A to-do app will generally need a component that handles the data, which responsibility is to add/remove items, and notify other components about that.
 
 # Flight testing principles (optional)
 
-Flight components are only able to comunicate via events, so we are going focus on testing only events and not the methods inside the component.
+Flight components are only able to communicate via events, so we are going focus on testing only events and not the methods inside the component.
 
 Here is a general rule of thumb for testing a Flight component.
 
@@ -37,10 +37,10 @@ In this case we are going to be using jasmine-flight, you might want to go and [
 
 # Testing data components
 
-Some importants things to remember about data components are:
+Some important things to remember about data components are:
 
 * Don't test anything related with the DOM.
-* They shoudn't know about the UI structure.
+* They shouldn't know about the UI structure.
 
 We have a `data/items.js` which simulates a backend, it adds/removes to-do items and serves them.
 
@@ -50,7 +50,7 @@ This components is basically doing three things.
 * Listens to the `uiRemoveItemAction` event, removes the selected item from the list and triggers `dataItems` to notify that the items were updated.
 * Triggers the `dataItems` after initialization to notify components about the initial to-do items.
 
-For the sake of simplicity we are going to save the to-do items in an array, but our tests will never know about that, so we can modify it to save on local-storage or in the backend without alterating the tests too much.
+For the sake of simplicity we are going to save the to-do items in an array, but our tests will never know about that, so we can modify it to save on local-storage or in the backend without altering the tests too much.
 
 *NOTE: For a more robust storage component see [flight-storage](https://github.com/cameronhunter/flight-storage).*
 
@@ -172,7 +172,7 @@ describe('Initialization', function () {
 
 [setupComponent](https://github.com/flightjs/jasmine-flight#setupcomponent) creates an instance of the component, it also sets the instance to `this.component`. You can pass an object to `setupComponent` and it will be set as the `defaultAttrs`.
 
-For this test we are spying on the event that we expect to be triggered, instanciating the components and making sure that the event was triggered with the appropiate data (the items in the to-do list).
+For this test we are spying on the event that we expect to be triggered, instantiating the components and making sure that the event was triggered with the appropriate data (the items in the to-do list).
 
 
 {% codeblock Adding new to-do items lang:js %}
@@ -223,9 +223,9 @@ describe('Listeners', function () {
 });
 {% endcodeblock %}
 
-This test is oposite of the previous one, it test the removal of items from the list.
+This test is opposite of the previous one, it test the removal of items from the list.
 
 
 # Conclusion
 
-Note how we never tested any method inside the component, we don't know anything about its internal structure. This makes refatoring the internals really simple, because no test is bounded to implementation. Actually we don't even know or care where the items are being saved, they might be saved on localStorage, cookies, in-memory, etc.
+Note how we never tested any method inside the component; we don't know anything about its internal structure. This makes refactoring the internals really simple, because no test is bounded to implementation. Actually we don't even know or care where the items are being saved, they might be saved on localStorage, cookies, in-memory, etc.
