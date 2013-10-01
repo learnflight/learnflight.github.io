@@ -4,7 +4,7 @@ title: "Testing a Flight data component"
 date: 2013-10-01 09:53
 comments: true
 published: true
-categories:
+categories: [Test, Data Component, Twitter Flight]
 ---
 
 Testing components in Flight is damn fun. This is because, by nature, they are fully encapsulated and decoupled from the rest of your application.

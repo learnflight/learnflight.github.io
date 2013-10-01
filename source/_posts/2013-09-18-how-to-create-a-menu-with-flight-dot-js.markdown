@@ -3,7 +3,7 @@ layout: post
 title: "How to create a menu with Flight.js"
 date: 2013-09-18 15:56
 comments: true
-categories:
+categories: [Getting Started, Twitter Flight]
 ---
 
 We are going to create a simple navigation menu with [Flight.js](http://flightjs.github.io/). The purpose of this post is to illustrate a practical Flight.js example. Here are the [docs](https://github.com/flightjs/flight/tree/master/doc) and the [github page](https://github.com/flightjs/flight) if you want to check them out.
