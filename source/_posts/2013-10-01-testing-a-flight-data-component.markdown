@@ -1,9 +1,9 @@
 ---
 layout: post
 title: "Testing a Flight data component"
-date: 2013-09-20 09:53
+date: 2013-10-01 09:53
 comments: true
-published: false
+published: true
 categories:
 ---
 
