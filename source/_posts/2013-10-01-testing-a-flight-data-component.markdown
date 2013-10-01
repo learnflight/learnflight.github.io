@@ -7,15 +7,15 @@ published: true
 categories:
 ---
 
-Testing components in Flight is damn fun. This is because, by nature, they are fully decoupled from the rest of your application.
+Testing components in Flight is damn fun. This is because, by nature, they are fully encapsulated and decoupled from the rest of your application.
 
-As of today the best to way of testing Flight is with [jasmine-flight](https://github.com/flightjs/jasmine-flight) or [mocha-flight](https://github.com/flightjs/mocha-flight), which are extensions to Jasmine and Mocha respectively.
+As of today the best way of testing Flight is with [jasmine-flight](https://github.com/flightjs/jasmine-flight) or [mocha-flight](https://github.com/flightjs/mocha-flight), which are extensions to Jasmine and Mocha respectively.
 
-For this post we are going to use a really simple to-do app. A to-do app will generally need a component that handles the data, which responsibility is to add/remove items, and notify other components about that.
+For this post we are going to use a really simple to-do app. A to-do app will generally need a component that handles the data, which has the responsibility of adding/removing items, and notifying other components about that.
 
 ## Flight testing principles (optional)
 
-Flight components are only able to communicate via events, so we are going focus on testing only events and not the methods inside the component.
+Flight components communicate via events, so we are going focus on testing only events and not the methods inside the component.
 
 Here is a general rule of thumb for testing a Flight component.
 
@@ -24,7 +24,7 @@ Here is a general rule of thumb for testing a Flight component.
 #### Do test
 
 * **Event listeners**: Any event that the component is listening to.
-* **Event triggers**: Any event that the component is triggering.
+* **Event triggers**: Any event that the component can trigger.
 * **defaultAttrs**: Customization via defaultAttrs.
 * **Initialization**: Special events that are triggered after initialization.
 
