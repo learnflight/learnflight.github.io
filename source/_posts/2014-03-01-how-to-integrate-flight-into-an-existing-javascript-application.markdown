@@ -9,25 +9,25 @@ categories:
 How to integrate Flight into an exisiting Javascript application.
 
 One of the best things about Flight is that it plays well with exisiting apps. This means that you don't need to migrate your whole app at once.
-Because flight components can't communicate directly with the outside wolrd, you can gradually migrate new components without affecting the rest of the application.
+Because flight components can't communicate directly with the outside world, you can gradually migrate new components without affecting the rest of the application.
 
-For this example we are going to use a Color Raffle application, this app consists of three basic parts.
+For this example we are going to use a Color Raffle application, this app consists of three basic parts:
 
 1. **Raffle button:** Picks a random color whenever it is clicked.
 2. **Color Stats:** Each of the color stats will update everytime that given color comes out of the raffle.
-3. **Histoy:** Every time a color is selected, it will be added to the history wall.
+3. **History:** Every time a color is selected, it will be added to the history wall.
 
-NOTE: We will not go thought the process (setting up Flight and it depencencies)[], but it is a really easy process.
+NOTE: We will not go thought the process (setting up Flight and its depencencies)[], but it is a really easy process.
 
 ### DEMO PENDING ###
 
 {% codeblock application.js lang:js %}
 $(function () {
 
-  updateColorStat = function (color) {
+  var updateColorStat = function (color) {
     $('.tweet-stat').each(function () {
       var $node = $(this);
-      var count = parseInt($node.text());
+      var count = parseInt($node.text(), 10);
 
       if (this.$node.data('color') == data.color) {
         this.$node.text(count + 1);
@@ -37,7 +37,7 @@ $(function () {
     });
   };
 
-  updateHistory = function (color) {
+  var updateHistory = function (color) {
     var $history = $('.history');
     $history.append('<li>' + color + '</li>');
   };
@@ -53,16 +53,16 @@ $(function () {
 {% endcodeblock %}
 
 
-Intentionally we use a really badly structured Javascript app. An easy way to start integrating flight is to select one of the three components mentioned above(Raffle button, Color Stats and Histoy) and convert it into a Flight component.
+Intentionally we use a really badly structured Javascript app. An easy way to start integrating flight is to select one of the three components mentioned above (Raffle button, Color Stats and History) and convert it into a Flight component.
 
 Let's choose the color stats as a starting point. This is just a function that will update the count of the element which its `data-color` attribute matches the given color.
 
 {% codeblock updateColorStat lang:js %}
 
-updateColorStat = function (color) {
+var updateColorStat = function (color) {
   $('.tweet-stat').each(function () {
     var $node = $(this);
-    var count = parseInt($node.text());
+    var count = parseInt($node.text(), 10);
 
     if (this.$node.data('color') == data.color) {
       this.$node.text(count + 1);
@@ -79,7 +79,7 @@ In a new file `component/color_stat.js` lets create an empty flight component.
 A Component is just a constructor with properties mixed into its prototype. It comes with a set of basic functionality such as event handling and Component registration.
 {% endblockquote %}
 
-In Flight a component instance cannot be referenced directly; it communicates with other components via events.
+In Flight a component communicates with other components via events, functions are not accessible on the component instance.
 
 {% codeblock components/color_stats.js lang:js %}
 
@@ -123,7 +123,7 @@ define(function (require) {
       } else {
         this.$node.text(count - 1);
       }
-    }
+    };
 
     this.after('initialize', function () {
 
@@ -152,17 +152,17 @@ this.after('initialize', function () {
 });
 {% endcodeblock %}
 
-We are going to attach our component to each of the tweet stats element and done.
+We are going to attach our component to each of the color stats element and done.
 
 {% codeblock page/default.js lang:js %}
 
-var TweetStat = require('components/color_stat');
+var ColorStat = require('components/color_stat');
 
-TweetStat.attachTo('.tweet-stat');
+ColorStat.attachTo('.color-stat');
 
 {% endcodeblock %}
 
-By now we are done migrating our first component, lets continue with the history component. We are going to follow the same steps
+By now we are done migrating our first component, lets continue with the history component. We are going to follow the same steps:
 
 1) Create an empty component.
 
@@ -198,8 +198,8 @@ define(function (require) {
   return defineComponent(history);
 
   function history() {
-    updateHistory = function (color) {
-      this.$node.append('<li>' + color + '</li>');
+    this.updateHistory = function (event, data) {
+      this.$node.append('<li>' + data.color + '</li>');
     };
 
     this.after('initialize', function () {
@@ -222,11 +222,11 @@ define(function (require) {
 
 {% codeblock page/default.js lang:js %}
 
-var TweetStat = require('components/color_stat');
-var Histoy = require('components/histoy');
+var ColorStat = require('components/color_stat');
+var History = require('components/history');
 
-TweetStat.attachTo('.tweet-stat');
-Histoy.attachTo('.histoy');
+ColorStat.attachTo('.color-stat');
+History.attachTo('.history');
 
 {% endcodeblock %}
 
@@ -246,6 +246,6 @@ $(function () {
 
 By now we have already moved two of the three components, I will let you do the last one on your own, but it basically the same steps.
 
-So, what have we achieved? We have divided the responsabilities accross different components that are completely decoupled from each other. Scaling this app is now easier and more maintainable due to the modular nature of Flight.
+So, what have we achieved? We have divided the responsibilities across different components that are completely decoupled from each other. Scaling this app is now easier and more maintainable due to the modular nature of Flight.
 
-The three components are ui components, but in the next post we are going to see how to extract a data component that handles all the data logic and provide it to the ui components.
+The three components are UI components, but in the next post we are going to see how to extract a data component that handles all the data logic and provide it to the ui components.
