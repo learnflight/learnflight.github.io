@@ -4,7 +4,7 @@
   <title><![CDATA[Learn Flight.js]]></title>
   <link href="http://learnflight.io/atom.xml" rel="self"/>
   <link href="http://learnflight.io/"/>
-  <updated>2014-03-13T13:17:52-07:00</updated>
+  <updated>2014-03-13T13:26:22-07:00</updated>
   <id>http://learnflight.io/</id>
   <author>
     <name><![CDATA[Rogelio Guzman]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[How to integrate Flight into an existing Javascript application]]></title>
+    <title type="html"><![CDATA[How to integrate Flight into an existing JavaScript application]]></title>
     <link href="http://learnflight.io/blog/2014/03/13/how-to-integrate-flight-into-an-existing-javascript-application/"/>
     <updated>2014-03-13T12:56:00-07:00</updated>
     <id>http://learnflight.io/blog/2014/03/13/how-to-integrate-flight-into-an-existing-javascript-application</id>
@@ -39,7 +39,7 @@ Because flight components can&rsquo;t communicate directly with the outside worl
 <!-- more -->
 
 
-<p>Intentionally,  we use a really badly structured Javascript app. An easy way to start integrating flight is to select one of the three components mentioned above (Raffle button, Color Stats and History) and convert it into a Flight component.</p>
+<p>Intentionally,  we use a really badly structured JavaScript app. An easy way to start integrating flight is to select one of the three components mentioned above (Raffle button, Color Stats and History) and convert it into a Flight component.</p>
 
 <figure class='code'><figcaption><span>application.js </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
