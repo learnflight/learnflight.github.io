@@ -17,9 +17,9 @@ For this example we are going to use a Color Raffle application, this app consis
 2. **Color Stats:** Each of the color stats will update everytime that given color comes out of the raffle.
 3. **History:** Every time a color is selected, it will be added to the history wall.
 
-NOTE: We will not go thought the process [setting up Flight and its depencencies](https://github.com/flightjs/flight#installation), but it is a really easy process.
+NOTE: We will not go thought the process [setting up Flight and its depencencies](https://github.com/flightjs/flight#installation), but it is a really easy process. For simplicity we are going to use the Flight [standalone](https://github.com/flightjs/flight#standalone-version) version.
 
-### DEMO PENDING ###
+[View Source](https://gist.github.com/rogeliog/9519964) or [Live Demo](http://rogeliog.github.io/learn-flight-color-raffle-demo)
 
 {% codeblock application.js lang:js %}
 $(function () {
