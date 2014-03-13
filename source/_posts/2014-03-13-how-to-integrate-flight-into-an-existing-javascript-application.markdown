@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "How to integrate Flight into an existing Javascript application"
-date: 2014-03-14 12:56
+date: 2014-03-13 12:56
 comments: true
 categories: [Getting Started, Twitter Flight]
 ---
