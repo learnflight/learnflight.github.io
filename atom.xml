@@ -4,7 +4,7 @@
   <title><![CDATA[Learn Flight.js]]></title>
   <link href="http://learnflight.io/atom.xml" rel="self"/>
   <link href="http://learnflight.io/"/>
-  <updated>2014-03-13T00:15:31-07:00</updated>
+  <updated>2014-03-13T13:14:42-07:00</updated>
   <id>http://learnflight.io/</id>
   <author>
     <name><![CDATA[Rogelio Guzman]]></name>
@@ -30,7 +30,7 @@ Because flight components can&rsquo;t communicate directly with the outside worl
 </ol>
 
 
-<p>NOTE: We will not go thought the process <a href="https://github.com/flightjs/flight#installation">setting up Flight and its depencencies</a>, but it is a really easy process. For simplicity we are going to use the Flight <a href="https://github.com/flightjs/flight#standalone-version">standalone</a> version.</p>
+<p>NOTE: We will not go through the process <a href="https://github.com/flightjs/flight#installation">setting up Flight and its depencencies</a>, but it is a really easy process. For simplicity we are going to use the Flight <a href="https://github.com/flightjs/flight#standalone-version">standalone</a> version.</p>
 
 <p><img class="center small" src="http://learnflight.io/images/color-raffle.png"></p>
 
@@ -39,7 +39,7 @@ Because flight components can&rsquo;t communicate directly with the outside worl
 <!-- more -->
 
 
-
+<p>Intentionally,  we use a really badly structured Javascript app. An easy way to start integrating flight is to select one of the three components mentioned above (Raffle button, Color Stats and History) and convert it into a Flight component.</p>
 
 <figure class='code'><figcaption><span>application.js </span></figcaption>
  <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -98,8 +98,6 @@ Because flight components can&rsquo;t communicate directly with the outside worl
 </span><span class='line'><span class="p">});</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
-<p>Intentionally we use a really badly structured Javascript app. An easy way to start integrating flight is to select one of the three components mentioned above (Raffle button, Color Stats and History) and convert it into a Flight component.</p>
 
 <p>Let&rsquo;s choose the color stats as a starting point. This is just a function that will update the count of the element which its <code>data-color</code> attribute matches the given color.</p>
 
