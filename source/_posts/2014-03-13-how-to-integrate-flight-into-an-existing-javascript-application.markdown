@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "How to integrate Flight into an existing Javascript application"
+title: "How to integrate Flight into an existing JavaScript application"
 date: 2014-03-13 12:56
 comments: true
 categories: [Getting Started, Twitter Flight]
@@ -23,7 +23,7 @@ NOTE: We will not go through the process [setting up Flight and its depencencies
 
 <!-- more -->
 
-Intentionally,  we use a really badly structured Javascript app. An easy way to start integrating flight is to select one of the three components mentioned above (Raffle button, Color Stats and History) and convert it into a Flight component.
+Intentionally,  we use a really badly structured JavaScript app. An easy way to start integrating flight is to select one of the three components mentioned above (Raffle button, Color Stats and History) and convert it into a Flight component.
 
 {% codeblock application.js lang:js %}
 $(function () {
