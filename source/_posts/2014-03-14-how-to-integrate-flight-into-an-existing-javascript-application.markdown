@@ -17,6 +17,8 @@ For this example we are going to use a Color Raffle application, this app consis
 
 NOTE: We will not go thought the process [setting up Flight and its depencencies](https://github.com/flightjs/flight#installation), but it is a really easy process. For simplicity we are going to use the Flight [standalone](https://github.com/flightjs/flight#standalone-version) version.
 
+{% img center small /images/color-raffle.png %}
+
 [View Source](https://gist.github.com/rogeliog/9519964) or [Live Demo](http://rogeliog.github.io/learn-flight-color-raffle-demo)
 
 <!-- more -->
