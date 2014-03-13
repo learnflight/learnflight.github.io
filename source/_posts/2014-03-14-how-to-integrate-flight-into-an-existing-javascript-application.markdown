@@ -1,12 +1,10 @@
 ---
 layout: post
 title: "How to integrate Flight into an existing Javascript application"
-date: 2014-03-01 12:56
+date: 2014-03-14 12:56
 comments: true
-categories:
+categories: [Getting Started, Twitter Flight]
 ---
-
-How to integrate Flight into an exisiting Javascript application.
 
 One of the best things about Flight is that it plays well with exisiting apps. This means that you don't need to migrate your whole app at once.
 Because flight components can't communicate directly with the outside world, you can gradually migrate new components without affecting the rest of the application.
