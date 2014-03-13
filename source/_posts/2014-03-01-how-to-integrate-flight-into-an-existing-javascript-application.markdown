@@ -17,7 +17,7 @@ For this example we are going to use a Color Raffle application, this app consis
 2. **Color Stats:** Each of the color stats will update everytime that given color comes out of the raffle.
 3. **History:** Every time a color is selected, it will be added to the history wall.
 
-NOTE: We will not go thought the process (setting up Flight and its depencencies)[], but it is a really easy process.
+NOTE: We will not go thought the process [setting up Flight and its depencencies](https://github.com/flightjs/flight#installation), but it is a really easy process.
 
 ### DEMO PENDING ###
 
@@ -25,12 +25,12 @@ NOTE: We will not go thought the process (setting up Flight and its depencencies
 $(function () {
 
   var updateColorStat = function (color) {
-    $('.tweet-stat').each(function () {
+    $('.color-stat').each(function () {
       var $node = $(this);
       var count = parseInt($node.text(), 10);
 
       if (this.$node.data('color') == data.color) {
-        this.$node.text(count + 1);
+        this.$node.text(count + 4);
       } else {
         this.$node.text(count - 1);
       }
@@ -43,7 +43,7 @@ $(function () {
   };
 
   var colors = ['red', 'green', 'blue'];
-  $('.Raffle-trigger').on('click', function () {
+  $('.raffle-trigger').on('click', function () {
     var color = colors[Math.floor(Math.random()*colors.length)];
     updateColorStat(color);
     updateHistory(color);
@@ -65,7 +65,7 @@ var updateColorStat = function (color) {
     var count = parseInt($node.text(), 10);
 
     if (this.$node.data('color') == data.color) {
-      this.$node.text(count + 1);
+      this.$node.text(count + 4);
     } else {
       this.$node.text(count - 1);
     }
@@ -83,15 +83,7 @@ In Flight a component communicates with other components via events, functions a
 
 {% codeblock components/color_stats.js lang:js %}
 
-define(function (require) {
-
-  'use strict';
-
-  var defineComponent = require('flight/lib/component');
-
-  return defineComponent(colorStat);
-
-  function colorStat() {
+var ColorStat = flight.component(function () {
     this.after('initialize', function () {
 
     });
@@ -106,35 +98,26 @@ Now that we have our empty component, lets copy the `updateColorStat` logic into
 
 {% codeblock components/color_stats.js lang:js %}
 
-define(function (require) {
+var ColorStat = flight.component(function () {
+  this.updateColorStat = function (event, data) {
+    var count = parseInt(this.$node.text(), 10);
 
-  'use strict';
+    if (this.$node.data('color') == data.color) {
+      this.$node.text(count + 4);
+    } else {
+      this.$node.text(count - 1);
+    }
+  };
 
-  var defineComponent = require('flight/lib/component');
+  this.after('initialize', function () {
 
-  return defineComponent(colorStat);
-
-  function colorStat() {
-    this.updateColorStat = function (event, data) {
-      var count = parseInt($node.text());
-
-      if (this.$node.data('color') == data.color) {
-        this.$node.text(count + 1);
-      } else {
-        this.$node.text(count - 1);
-      }
-    };
-
-    this.after('initialize', function () {
-
-    });
-  }
+  });
 });
 
 {% endcodeblock %}
 
 Great! But how are we going to wire them together? This is the easiest part, we simply want to trigger an event every time the raffle button is clicked.
-So, lets replace the call to `updateColorStat` and trigger an event (see Flight events naming conventions for more info.)[] `uiColorSelected` and remove updateColorStat.
+So, lets replace the call to `updateColorStat` and trigger an event, [see Flight events naming conventions](https://blog.twitter.com/2013/flight-at-tweetdeck), `uiColorSelected` and remove updateColorStat.
 
 {% codeblock application.js lang:js %}
 $('.Raffle-trigger').on('click', function () {
@@ -156,8 +139,6 @@ We are going to attach our component to each of the color stats element and done
 
 {% codeblock page/default.js lang:js %}
 
-var ColorStat = require('components/color_stat');
-
 ColorStat.attachTo('.color-stat');
 
 {% endcodeblock %}
@@ -168,19 +149,10 @@ By now we are done migrating our first component, lets continue with the history
 
 {% codeblock components/history.js lang:js %}
 
-define(function (require) {
+var History = flight.component(function () {
+  this.after('initialize', function () {
 
-  'use strict';
-
-  var defineComponent = require('flight/lib/component');
-
-  return defineComponent(history);
-
-  function history() {
-    this.after('initialize', function () {
-
-    });
-  }
+  });
 });
 
 {% endcodeblock %}
@@ -189,23 +161,14 @@ define(function (require) {
 
 {% codeblock components/history.js lang:js %}
 
-define(function (require) {
+var History = flight.component(function () {
+  this.updateHistory = function (event, data) {
+    this.$node.append('<li>' + data.color + '</li>');
+  };
 
-  'use strict';
+  this.after('initialize', function () {
 
-  var defineComponent = require('flight/lib/component');
-
-  return defineComponent(history);
-
-  function history() {
-    this.updateHistory = function (event, data) {
-      this.$node.append('<li>' + data.color + '</li>');
-    };
-
-    this.after('initialize', function () {
-
-    });
-  }
+  });
 });
 
 {% endcodeblock %}
@@ -221,9 +184,6 @@ define(function (require) {
 4) Attach component to element
 
 {% codeblock page/default.js lang:js %}
-
-var ColorStat = require('components/color_stat');
-var History = require('components/history');
 
 ColorStat.attachTo('.color-stat');
 History.attachTo('.history');
@@ -244,7 +204,30 @@ $(function () {
 
 {% endcodeblock %}
 
-By now we have already moved two of the three components, I will let you do the last one on your own, but it basically the same steps.
+By now we have already moved two of the three components, I will let you do the last one on your own, but it basically the same step.
+
+This is how it might look.
+
+{% codeblock components/raffle_trigger.js lang:js %}
+
+var RaffleTrigger = flight.component(function () {
+  this.defaultAttrs({
+    colors: ['red', 'green', 'blue']
+  });
+
+  this.selectColor = function (event, data) {
+    var color = this.attr.colors[Math.floor(Math.random() * this.attr.colors.length)];
+    this.trigger('uiColorSelected', { color: color });
+  };
+
+  this.after('initialize', function () {
+    this.on('click', this.selectColor);
+  });
+});
+
+{% endcodeblock %}
+
+You can find the full code [here](https://gist.github.com/rogeliog/9519964).
 
 So, what have we achieved? We have divided the responsibilities across different components that are completely decoupled from each other. Scaling this app is now easier and more maintainable due to the modular nature of Flight.
 
