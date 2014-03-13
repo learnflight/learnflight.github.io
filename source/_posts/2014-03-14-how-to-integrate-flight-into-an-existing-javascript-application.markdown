@@ -15,13 +15,15 @@ For this example we are going to use a Color Raffle application, this app consis
 2. **Color Stats:** Each of the color stats will update everytime that given color comes out of the raffle.
 3. **History:** Every time a color is selected, it will be added to the history wall.
 
-NOTE: We will not go thought the process [setting up Flight and its depencencies](https://github.com/flightjs/flight#installation), but it is a really easy process. For simplicity we are going to use the Flight [standalone](https://github.com/flightjs/flight#standalone-version) version.
+NOTE: We will not go through the process [setting up Flight and its depencencies](https://github.com/flightjs/flight#installation), but it is a really easy process. For simplicity we are going to use the Flight [standalone](https://github.com/flightjs/flight#standalone-version) version.
 
 {% img center small /images/color-raffle.png %}
 
 [View Source](https://gist.github.com/rogeliog/9519964) or [Live Demo](http://rogeliog.github.io/learn-flight-color-raffle-demo)
 
 <!-- more -->
+
+Intentionally,  we use a really badly structured Javascript app. An easy way to start integrating flight is to select one of the three components mentioned above (Raffle button, Color Stats and History) and convert it into a Flight component.
 
 {% codeblock application.js lang:js %}
 $(function () {
@@ -53,9 +55,6 @@ $(function () {
 });
 
 {% endcodeblock %}
-
-
-Intentionally we use a really badly structured Javascript app. An easy way to start integrating flight is to select one of the three components mentioned above (Raffle button, Color Stats and History) and convert it into a Flight component.
 
 Let's choose the color stats as a starting point. This is just a function that will update the count of the element which its `data-color` attribute matches the given color.
 
