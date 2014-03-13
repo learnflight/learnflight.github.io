@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Getting Started | Learn Flight.js]]></title>
   <link href="http://learnflight.io/blog/categories/getting-started/atom.xml" rel="self"/>
   <link href="http://learnflight.io/"/>
-  <updated>2014-03-13T00:07:30-07:00</updated>
+  <updated>2014-03-13T00:15:31-07:00</updated>
   <id>http://learnflight.io/</id>
   <author>
     <name><![CDATA[Rogelio Guzman]]></name>
@@ -31,6 +31,8 @@ Because flight components can&rsquo;t communicate directly with the outside worl
 
 
 <p>NOTE: We will not go thought the process <a href="https://github.com/flightjs/flight#installation">setting up Flight and its depencencies</a>, but it is a really easy process. For simplicity we are going to use the Flight <a href="https://github.com/flightjs/flight#standalone-version">standalone</a> version.</p>
+
+<p><img class="center small" src="/images/color-raffle.png"></p>
 
 <p><a href="https://gist.github.com/rogeliog/9519964">View Source</a> or <a href="http://rogeliog.github.io/learn-flight-color-raffle-demo">Live Demo</a></p>
 
