@@ -1,0 +1,920 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Twitter Flight | Learn Flight.js]]></title>
+  <link href="http://learnflight.github.io/blog/categories/twitter-flight/atom.xml" rel="self"/>
+  <link href="http://learnflight.github.io/"/>
+  <updated>2014-03-12T22:46:07-07:00</updated>
+  <id>http://learnflight.github.io/</id>
+  <author>
+    <name><![CDATA[Rogelio Guzman]]></name>
+    <email><![CDATA[chinog9@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Testing a Flight data component]]></title>
+    <link href="http://learnflight.github.io/blog/2013/10/01/testing-a-flight-data-component/"/>
+    <updated>2013-10-01T09:53:00-07:00</updated>
+    <id>http://learnflight.github.io/blog/2013/10/01/testing-a-flight-data-component</id>
+    <content type="html"><![CDATA[<p>Testing components in Flight is damn fun. This is because, by nature, they are fully encapsulated and decoupled from the rest of your application.</p>
+
+<p>As of today the best way of testing Flight is with <a href="https://github.com/flightjs/jasmine-flight">jasmine-flight</a> or <a href="https://github.com/flightjs/mocha-flight">mocha-flight</a>, which are extensions to Jasmine and Mocha respectively.</p>
+
+<p>For this post we are going to use a really simple to-do app. A to-do app will generally need a component that handles the data, which has the responsibility of adding/removing items, and notifying other components about that.</p>
+
+<h2>Flight testing principles (optional)</h2>
+
+<p>Flight components communicate via events, so we are going focus on testing only events and not the methods inside the component.</p>
+
+<p>Here is a general rule of thumb for testing a Flight component.</p>
+
+<!-- more -->
+
+
+<h4>Do test</h4>
+
+<ul>
+<li><strong>Event listeners</strong>: Any event that the component is listening to.</li>
+<li><strong>Event triggers</strong>: Any event that the component can trigger.</li>
+<li><strong>defaultAttrs</strong>: Customization via defaultAttrs.</li>
+<li><strong>Initialization</strong>: Special events that are triggered after initialization.</li>
+</ul>
+
+
+<h4>Don&rsquo;t test</h4>
+
+<ul>
+<li><strong>Methods</strong>: The internal methods that are called when listening or triggering events.</li>
+<li><strong>Internal state</strong>: Any component state that is not part of the <code>this.attr</code> property.</li>
+</ul>
+
+
+<h3>Setup</h3>
+
+<p>In this case we are going to be using jasmine-flight, you might want to go and <a href="https://github.com/flightjs/jasmine-flight#getting-started">set it up</a>.</p>
+
+<h2>Testing data components</h2>
+
+<p>Some important things to remember about data components are:</p>
+
+<ul>
+<li>Don&rsquo;t test anything related with the DOM.</li>
+<li>They shouldn&rsquo;t know about the UI structure.</li>
+</ul>
+
+
+<p>We have a <code>data/items.js</code> which simulates a backend, it adds/removes to-do items and serves them.</p>
+
+<p>This components is basically doing three things.</p>
+
+<ul>
+<li>Listens to the <code>uiNewItemAction</code> event, adds the new item to the list and triggers <code>dataItems</code> to notify that the items were updated.</li>
+<li>Listens to the <code>uiRemoveItemAction</code> event, removes the selected item from the list and triggers <code>dataItems</code> to notify that the items were updated.</li>
+<li>Triggers the <code>dataItems</code> after initialization to notify components about the initial to-do items.</li>
+</ul>
+
+
+<p>For the sake of simplicity we are going to save the to-do items in an array, but our tests will never know about that, so we can modify it to save on local-storage or in the backend without altering the tests too much.</p>
+
+<p><em>NOTE: For a more robust storage component see <a href="https://github.com/cameronhunter/flight-storage">flight-storage</a>.</em></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>data/items.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">define</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">require</span><span class="p">)</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">use</span> <span class="nx">strict</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;;</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="kd">var</span> <span class="nx">defineComponent</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">flight</span><span class="o">/</span><span class="nx">lib</span><span class="o">/</span><span class="nx">component</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;);</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="k">return</span> <span class="nx">defineComponent</span><span class="p">(</span><span class="nx">items</span><span class="p">);</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="kd">function</span> <span class="nx">items</span><span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="k">this</span><span class="p">.</span><span class="nx">defaultAttrs</span><span class="p">({</span>
+</span><span class='line'>  <span class="nx">todoItems</span><span class="o">:</span> <span class="p">[]</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">this</span><span class="p">.</span><span class="nx">createItem</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">attr</span><span class="p">.</span><span class="nx">todoItems</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">item</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">triggerDataItems</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">this</span><span class="p">.</span><span class="nx">removeItem</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">attr</span><span class="p">.</span><span class="nx">todoItems</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">attr</span><span class="p">.</span><span class="nx">todoItems</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">item</span> <span class="o">!=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">item</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">triggerDataItems</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">this</span><span class="p">.</span><span class="nx">triggerDataItems</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;dataItems&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">items</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">attr</span><span class="p">.</span><span class="nx">todoItems</span> <span class="p">});</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">this</span><span class="p">.</span><span class="nx">after</span><span class="p">(</span><span class="s1">&#39;initialize&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;uiNewItemAction&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">createItem</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;uiRemoveItemAction&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">removeItem</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">triggerDataItems</span><span class="p">();</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">}</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>spec/data/items.spec.js &mdash;&ndash; TEST FILE </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">use</span> <span class="nx">strict</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;;</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">describeComponent</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">component</span><span class="o">/</span><span class="nx">data</span><span class="o">/</span><span class="nx">items</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="nx">describe</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">Initialization</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nx">it</span><span class="p">(</span><span class="s1">&#39;triggers dataItems with the initial todo items&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">eventSpy</span> <span class="o">=</span> <span class="nx">spyOnEvent</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;dataItems&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="nx">setupComponent</span><span class="p">({</span> <span class="nx">todoItems</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;old item&quot;</span><span class="p">]</span> <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">expect</span><span class="p">(</span><span class="nx">eventSpy</span><span class="p">).</span><span class="nx">toHaveBeenTriggeredOnAndWith</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">items</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;old item&quot;</span><span class="p">]</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">});</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="nx">describe</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">Listeners</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nx">beforeEach</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">setupComponent</span><span class="p">({</span> <span class="nx">todoItems</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;item 1&quot;</span><span class="p">,</span> <span class="s2">&quot;item 2&quot;</span><span class="p">]</span> <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;Listens to uiNewItemAction&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;and triggers dataItems with current item and the new one&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">eventSpy</span> <span class="o">=</span> <span class="nx">spyOnEvent</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;dataItems&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">component</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;uiNewItemAction&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">item</span><span class="o">:</span> <span class="s2">&quot;new item&quot;</span><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">expect</span><span class="p">(</span><span class="nx">eventSpy</span><span class="p">).</span><span class="nx">toHaveBeenTriggeredOnAndWith</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">items</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;item 1&quot;</span><span class="p">,</span> <span class="s2">&quot;item 2&quot;</span><span class="p">,</span> <span class="s2">&quot;new item&quot;</span><span class="p">]</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;Listens to uiRemoveItemAction&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;and triggers dataItems without the selected item&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">eventSpy</span> <span class="o">=</span> <span class="nx">spyOnEvent</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;dataItems&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">component</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;uiRemoveItemAction&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">item</span><span class="o">:</span> <span class="s2">&quot;item 2&quot;</span><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">expect</span><span class="p">(</span><span class="nx">eventSpy</span><span class="p">).</span><span class="nx">toHaveBeenTriggeredOnAndWith</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">items</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;item 1&quot;</span><span class="p">]</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">});</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Lets break down this test file and walkthough it.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>describeComponent </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">use</span> <span class="nx">strict</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;;</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">describeComponent</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">component</span><span class="o">/</span><span class="nx">data</span><span class="o">/</span><span class="nx">items</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="c1">// more code</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><a href="https://github.com/flightjs/jasmine-flight#components">describeComponent</a> receives the path of the component that is going to be tested.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Initialization </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">Initialization</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">it</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">triggers</span> <span class="nx">dataItems</span> <span class="kd">with</span> <span class="nx">the</span> <span class="nx">initial</span> <span class="nx">todo</span> <span class="nx">items</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="kd">var</span> <span class="nx">eventSpy</span> <span class="o">=</span> <span class="nx">spyOnEvent</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;dataItems&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">setupComponent</span><span class="p">({</span> <span class="nx">todoItems</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;old item&quot;</span><span class="p">]</span> <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">expect</span><span class="p">(</span><span class="nx">eventSpy</span><span class="p">).</span><span class="nx">toHaveBeenTriggeredOnAndWith</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">items</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;old item&quot;</span><span class="p">]</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><a href="https://github.com/flightjs/jasmine-flight#event-spy">spyOnEvent</a> works for events in the same way that Jasmine&rsquo;s <a href="http://pivotal.github.io/jasmine/#section-Spies">spyOn</a> works for functions.</p>
+
+<p><a href="https://github.com/flightjs/jasmine-flight#setupcomponent">setupComponent</a> creates an instance of the component, it also sets the instance to <code>this.component</code>. You can pass an object to <code>setupComponent</code> and it will be set as the <code>defaultAttrs</code>.</p>
+
+<p>For this test we are spying on the event that we expect to be triggered, instantiating the components and making sure that the event was triggered with the appropriate data (the items in the to-do list).</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Adding new to-do items </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">Listeners</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="nx">beforeEach</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nx">setupComponent</span><span class="p">({</span> <span class="nx">todoItems</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;item 1&quot;</span><span class="p">,</span> <span class="s2">&quot;item 2&quot;</span><span class="p">]</span> <span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">});</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="nx">describe</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">Listens</span> <span class="nx">to</span> <span class="nx">uiNewItemAction</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nx">it</span><span class="p">(</span><span class="s1">&#39;and triggers dataItems with current item and the new one&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">eventSpy</span> <span class="o">=</span> <span class="nx">spyOnEvent</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;dataItems&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">component</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;uiNewItemAction&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">item</span><span class="o">:</span> <span class="s2">&quot;new item&quot;</span><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">expect</span><span class="p">(</span><span class="nx">eventSpy</span><span class="p">).</span><span class="nx">toHaveBeenTriggeredOnAndWith</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">items</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;item 1&quot;</span><span class="p">,</span> <span class="s2">&quot;item 2&quot;</span><span class="p">,</span> <span class="s2">&quot;new item&quot;</span><span class="p">]</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">});</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="c1">// more code</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>This test makes sure that the user is able to successfully add new items to the list. We are going to be sharing the call to <code>setupComponent</code> for both tests.</p>
+
+<p>For this test we are spying on the <code>dataItems</code> event and expecting it to be triggered with the two original items (item 1, item 2) and the &ldquo;new item&rdquo; after the <code>uiNewItemAction</code> event is triggered.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Removing to-do items </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">Listeners</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="nx">beforeEach</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nx">setupComponent</span><span class="p">({</span> <span class="nx">todoItems</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;item 1&quot;</span><span class="p">,</span> <span class="s2">&quot;item 2&quot;</span><span class="p">]</span> <span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">});</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="c1">// more code&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="nx">describe</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">Listens</span> <span class="nx">to</span> <span class="nx">uiRemoveItemAction</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nx">it</span><span class="p">(</span><span class="s1">&#39;and triggers dataItems without the selected item&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">eventSpy</span> <span class="o">=</span> <span class="nx">spyOnEvent</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;dataItems&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">component</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;uiRemoveItemAction&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">item</span><span class="o">:</span> <span class="s2">&quot;item 2&quot;</span><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">expect</span><span class="p">(</span><span class="nx">eventSpy</span><span class="p">).</span><span class="nx">toHaveBeenTriggeredOnAndWith</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">items</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;item 1&quot;</span><span class="p">]</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>This test is opposite of the previous one, it test the removal of items from the list.</p>
+
+<h1>Conclusion</h1>
+
+<p>Note how we never tested any method inside the component; we don&rsquo;t know anything about its internal structure. This makes refactoring the internals really simple, because no test is bounded to implementation. Actually we don&rsquo;t even know or care where the items are being saved, they might be saved on localStorage, cookies, in-memory, etc.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[How to create a menu with Flight.js]]></title>
+    <link href="http://learnflight.github.io/blog/2013/09/18/how-to-create-a-menu-with-flight-dot-js/"/>
+    <updated>2013-09-18T15:56:00-07:00</updated>
+    <id>http://learnflight.github.io/blog/2013/09/18/how-to-create-a-menu-with-flight-dot-js</id>
+    <content type="html"><![CDATA[<p>We are going to create a simple navigation menu with <a href="http://flightjs.github.io/">Flight.js</a>. The purpose of this post is to illustrate a practical Flight.js example. Here are the <a href="https://github.com/flightjs/flight/tree/master/doc">docs</a> and the <a href="https://github.com/flightjs/flight">github page</a> if you want to check them out.</p>
+
+<p><img class="center" src="/images/navigation-menu.png"></p>
+
+<p><a href="https://github.com/rogeliog/learn-flight-navigation-menu-demo/tree/master/app">View source</a> or <a href="http://rogeliog.github.io/learn-flight-navigation-menu-demo">Live demo</a>.</p>
+
+<!-- more -->
+
+
+<h2>Initial Setup</h2>
+
+<p>We need to setup some boring stuff to be sure that we all have the same beginning state. The fun stuff starts in the next section.</p>
+
+<p>Before we start be sure to have installed <a href="https://npmjs.org/">npm</a> and <a href="http://bower.io/">bower</a>. Lets create a new folder for our project. Inside our folder lets setup our project. We are going to use the <a href="https://github.com/flightjs/generator-flight">generator-flight</a> yeoman generator to create the basic scaffold for our application.</p>
+
+<p>This will install the appropiate yeoman generator and now we can create our app.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1&gt;might need sudo&lt;/h1&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;npm install -g generator-flight
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1&gt;NOTE: we don&amp;rsquo;t need Normalize.css or Bootstrap.css&lt;/h1&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;yo flight
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Once we have the basic scaffold we can add some markup and styles</p>
+
+<h3>Add the markup</h3>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/index.html </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;main&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;nav</span> <span class="na">id=</span><span class="s">&quot;menu&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;#&quot;</span> <span class="na">class=</span><span class="s">&quot;home menu-item&quot;</span><span class="nt">&gt;</span>Home<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;#&quot;</span> <span class="na">class=</span><span class="s">&quot;projects menu-item&quot;</span><span class="nt">&gt;</span>Projects<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;#&quot;</span> <span class="na">class=</span><span class="s">&quot;services menu-item&quot;</span><span class="nt">&gt;</span>Services<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;#&quot;</span> <span class="na">class=</span><span class="s">&quot;contact menu-item&quot;</span><span class="nt">&gt;</span>Contact<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/nav&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;menu-content&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    Please click a menu item
+</span><span class='line'>  <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'><span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;p&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>Paste some CSS</h3>
+
+<p>We also need to paste some CSS to make it a look a bit sexier.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/css/main.css </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">body</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">font</span><span class="o">:</span> <span class="m">15px</span><span class="o">/</span><span class="m">1</span><span class="o">.</span><span class="m">3</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">Open</span> <span class="n">Sans</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">,</span> <span class="k">sans-serif</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">color</span><span class="o">:</span> <span class="m">#5e5b64</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">text-align</span><span class="o">:</span><span class="k">center</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span><span class="o">&lt;/</span><span class="nt">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nt">h1</span><span class="o">&gt;</span><span class="nt">menu</span> <span class="p">{</span><span class="o">&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">display</span><span class="o">:</span> <span class="k">inline</span><span class="o">-</span><span class="k">block</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">margin</span><span class="o">:</span> <span class="m">60px</span> <span class="k">auto</span> <span class="m">45px</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">background-color</span><span class="o">:</span> <span class="m">#15a5ec</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">box</span><span class="o">-</span><span class="n">shadow</span><span class="o">:</span> <span class="m">0</span> <span class="m">1px</span> <span class="m">1px</span> <span class="m">#ccc</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span><span class="o">&lt;/</span><span class="nt">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nt">h1</span><span class="o">&gt;</span><span class="nt">menu</span> <span class="nc">.menu-item</span> <span class="p">{</span><span class="o">&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">display</span><span class="o">:</span> <span class="k">inline</span><span class="o">-</span><span class="k">block</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">padding</span><span class="o">:</span> <span class="m">20px</span> <span class="m">30px</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">color</span><span class="o">:</span> <span class="m">#fff</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">font-weight</span><span class="o">:</span> <span class="k">bold</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">font-size</span><span class="o">:</span> <span class="m">16px</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">text-decoration</span><span class="o">:</span> <span class="k">none</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">text-transform</span><span class="o">:</span> <span class="k">uppercase</span><span class="p">;</span>
+</span><span class='line'>  <span class="o">-</span><span class="n">webkit</span><span class="o">-</span><span class="n">transition</span><span class="o">:</span><span class="k">background-color</span> <span class="m">0.20s</span><span class="p">;</span>
+</span><span class='line'>  <span class="o">-</span><span class="n">moz</span><span class="o">-</span><span class="n">transition</span><span class="o">:</span><span class="k">background-color</span> <span class="m">0.20s</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">transition</span><span class="o">:</span><span class="k">background-color</span> <span class="m">0.20s</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span><span class="o">&lt;/</span><span class="nt">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nt">h1</span><span class="o">&gt;</span><span class="nt">menu</span><span class="nc">.home</span> <span class="nc">.home</span><span class="o">,&lt;/</span><span class="nt">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nt">h1</span><span class="o">&gt;</span><span class="nt">menu</span><span class="nc">.projects</span> <span class="nc">.projects</span><span class="o">,&lt;/</span><span class="nt">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nt">h1</span><span class="o">&gt;</span><span class="nt">menu</span><span class="nc">.services</span> <span class="nc">.services</span><span class="o">,&lt;/</span><span class="nt">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nt">h1</span><span class="o">&gt;</span><span class="nt">menu</span><span class="nc">.contact</span> <span class="nc">.contact</span><span class="p">{</span><span class="o">&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">background-color</span><span class="o">:</span> <span class="m">#999</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span><span class="o">&lt;/</span><span class="nt">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nt">p</span><span class="o">&gt;</span><span class="nc">.menu-content</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">font-size</span><span class="o">:</span><span class="m">18px</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">color</span><span class="o">:</span><span class="m">#fff</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">padding</span><span class="o">:</span> <span class="m">30px</span> <span class="m">10px</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">background-color</span><span class="o">:</span><span class="m">#c4d7e0</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">text-transform</span><span class="o">:</span> <span class="k">uppercase</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>Run the app</h3>
+
+<p>Lets run the app to be sure that everything is wired up properly.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;h1&gt;might need sudo&lt;/h1&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;npm install -g http-server
+</span><span class='line'>http-server app
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Visit <a href="http://localhost:8080">localhost:8080</a></p>
+
+<h2>Create the components</h2>
+
+<p>Now we can start creating our components. In this case we are going to create
+three of them.</p>
+
+<ul>
+<li>One for the <em>menu title</em>, another for the <em>menu content</em> and third one for <em>generating the data</em> that will be presented in the menu</li>
+</ul>
+
+
+<p>The first two components will be <strong>ui components</strong>, this means that we are going
+to attach them to a DOM element and they will manipulate it.</p>
+
+<p>The third component is a <strong>data component</strong>. This component doesn&rsquo;t know about the DOM state or the menu.
+It will only be generating the &ldquo;backend&rdquo; response with the appropiate content for
+a given section.</p>
+
+<p><strong>ui/menu_item.js</strong> This is the most complex component. It only knows about the menu title</p>
+
+<ul>
+<li>Listens to clicks on the <code>.menu-items</code> and triggers a <code>uiNeedsMenuSection</code>
+event to notify that we need to change the menu section.</li>
+<li>Listens to the <code>dataMenuSection</code> event sent from a data component, adds the appropiate class to highlight the <code>.menu-item</code></li>
+</ul>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/js/component/ui/menu_title.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">define</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">require</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">use</span> <span class="nx">strict</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;;</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="kd">var</span> <span class="nx">defineComponent</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">flight</span><span class="o">/</span><span class="nx">lib</span><span class="o">/</span><span class="nx">component</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;);</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="k">return</span> <span class="nx">defineComponent</span><span class="p">(</span><span class="nx">menuItems</span><span class="p">);</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="kd">function</span> <span class="nx">menuItems</span><span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="k">this</span><span class="p">.</span><span class="nx">defaultAttrs</span><span class="p">({</span>
+</span><span class='line'>  <span class="nx">itemSelector</span><span class="o">:</span> <span class="s1">&#39;.menu-item&#39;</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">this</span><span class="p">.</span><span class="nx">highlightSection</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">$node</span><span class="p">.</span><span class="nx">removeClass</span><span class="p">().</span><span class="nx">addClass</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">section</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">this</span><span class="p">.</span><span class="nx">requestSectionChange</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;uiNeedsMenuSection&#39;</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">section</span><span class="o">:</span> <span class="nx">$</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">).</span><span class="nx">text</span><span class="p">().</span><span class="nx">toLowerCase</span><span class="p">()</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">this</span><span class="p">.</span><span class="nx">after</span><span class="p">(</span><span class="s1">&#39;initialize&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">itemSelector</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">requestSectionChange</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;dataMenuSection&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">highlightSection</span><span class="p">);</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><strong>ui/menu_content.js</strong> It only knows how to replace the content given a markup</p>
+
+<ul>
+<li>Listens to the <code>dataMenuSection</code> event, updates the content with the appropriate markup notify that content changed.</li>
+</ul>
+
+
+<p>Note how it doesn&rsquo;t know anything about the <code>ui/menu_title.js</code> component or
+that the content needs to be changed because a menu section was clicked.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/js/component/ui/menu_content.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">define</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">require</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">use</span> <span class="nx">strict</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;;</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="kd">var</span> <span class="nx">defineComponent</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">flight</span><span class="o">/</span><span class="nx">lib</span><span class="o">/</span><span class="nx">component</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;);</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="k">return</span> <span class="nx">defineComponent</span><span class="p">(</span><span class="nx">menuContent</span><span class="p">);</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="kd">function</span> <span class="nx">menuContent</span><span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="k">this</span><span class="p">.</span><span class="nx">setText</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">$node</span><span class="p">.</span><span class="nx">html</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">markup</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">this</span><span class="p">.</span><span class="nx">after</span><span class="p">(</span><span class="s1">&#39;initialize&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;dataMenuSection&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">setText</span><span class="p">);</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><strong>data/menu_section.js</strong> This component knows how to get the appropiate data for any section.</p>
+
+<ul>
+<li>Listens to the <code>uiNeedsMenuSection</code> event and triggers a <code>dataMenuSection</code> to
+notify components that there is new content available for the menu.</li>
+</ul>
+
+
+<p>In this component you can create a <code>renderSection</code> function that will render a <a href="http://mustache.github.io/">mustache</a> template
+for that given section or even get some some data from the backend.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/js/component/data/menu_section.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">define</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">require</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">use</span> <span class="nx">strict</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;;</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="kd">var</span> <span class="nx">defineComponent</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">flight</span><span class="o">/</span><span class="nx">lib</span><span class="o">/</span><span class="nx">component</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;);</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="k">return</span> <span class="nx">defineComponent</span><span class="p">(</span><span class="nx">menuSection</span><span class="p">);</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="kd">function</span> <span class="nx">menuSection</span><span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="k">this</span><span class="p">.</span><span class="nx">changeSection</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;dataMenuSection&#39;</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">section</span><span class="o">:</span> <span class="nx">data</span><span class="p">.</span><span class="nx">section</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">markup</span><span class="o">:</span> <span class="s1">&#39;&amp;lt;b&amp;gt;&#39;</span> <span class="o">+</span> <span class="nx">data</span><span class="p">.</span><span class="nx">section</span> <span class="o">+</span> <span class="s1">&#39;&amp;lt;/b&amp;gt;&#39;</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">this</span><span class="p">.</span><span class="nx">after</span><span class="p">(</span><span class="s1">&#39;initialize&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;uiNeedsMenuSection&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">changeSection</span><span class="p">);</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h2>Attach the components to the page</h2>
+
+<p>We have created our components but right now they are just isolated modules, so
+we need to create a page and attach them to it so that we can interact with
+them.</p>
+
+<ul>
+<li><strong>menuTitleUI</strong>: attached to each menu item.</li>
+<li><strong>menuContentUI</strong>: attached to the menu content.</li>
+<li><strong>menuSectionData</strong>: it is a data component so it will be attached to the document.</li>
+</ul>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>app/js/page/default.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">define</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">require</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">use</span> <span class="nx">strict</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;;</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="kd">var</span> <span class="nx">menuTitleUI</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">component</span><span class="o">/</span><span class="nx">ui</span><span class="o">/</span><span class="nx">menu_title</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;);</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">menuContentUI</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">component</span><span class="o">/</span><span class="nx">ui</span><span class="o">/</span><span class="nx">menu_content</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;);</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">menuSectionData</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">component</span><span class="o">/</span><span class="nx">data</span><span class="o">/</span><span class="nx">menu_section</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;);</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="k">return</span> <span class="nx">initialize</span><span class="p">;</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="kd">function</span> <span class="nx">initialize</span><span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nx">menuTitleUI</span><span class="p">.</span><span class="nx">attachTo</span><span class="p">(</span><span class="s1">&#39;#menu&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">menuContentUI</span><span class="p">.</span><span class="nx">attachTo</span><span class="p">(</span><span class="s1">&#39;.menu-content&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">menuSectionData</span><span class="p">.</span><span class="nx">attachTo</span><span class="p">(</span><span class="nb">document</span><span class="p">)</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h2>Wrap up</h2>
+
+<p>By now you should be able to run your server and interact with your menu!</p>
+
+<p>It is important to notice how decoupled each component is from each other.
+Because that &ldquo;decoupleness&rdquo; of our components we have a pretty flexible and reusable menu.</p>
+
+<p><em>NOTE: English is not my native language, I&rsquo;ll be more than happy to receive any grammar or spelling corrections :)</em></p>
+]]></content>
+  </entry>
+  
+</feed>

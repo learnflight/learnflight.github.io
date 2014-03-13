@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Test | Learn Flight.js]]></title>
+  <link href="http://learnflight.github.io/blog/categories/test/atom.xml" rel="self"/>
+  <link href="http://learnflight.github.io/"/>
+  <updated>2014-03-12T22:46:07-07:00</updated>
+  <id>http://learnflight.github.io/</id>
+  <author>
+    <name><![CDATA[Rogelio Guzman]]></name>
+    <email><![CDATA[chinog9@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Testing a Flight data component]]></title>
+    <link href="http://learnflight.github.io/blog/2013/10/01/testing-a-flight-data-component/"/>
+    <updated>2013-10-01T09:53:00-07:00</updated>
+    <id>http://learnflight.github.io/blog/2013/10/01/testing-a-flight-data-component</id>
+    <content type="html"><![CDATA[<p>Testing components in Flight is damn fun. This is because, by nature, they are fully encapsulated and decoupled from the rest of your application.</p>
+
+<p>As of today the best way of testing Flight is with <a href="https://github.com/flightjs/jasmine-flight">jasmine-flight</a> or <a href="https://github.com/flightjs/mocha-flight">mocha-flight</a>, which are extensions to Jasmine and Mocha respectively.</p>
+
+<p>For this post we are going to use a really simple to-do app. A to-do app will generally need a component that handles the data, which has the responsibility of adding/removing items, and notifying other components about that.</p>
+
+<h2>Flight testing principles (optional)</h2>
+
+<p>Flight components communicate via events, so we are going focus on testing only events and not the methods inside the component.</p>
+
+<p>Here is a general rule of thumb for testing a Flight component.</p>
+
+<!-- more -->
+
+
+<h4>Do test</h4>
+
+<ul>
+<li><strong>Event listeners</strong>: Any event that the component is listening to.</li>
+<li><strong>Event triggers</strong>: Any event that the component can trigger.</li>
+<li><strong>defaultAttrs</strong>: Customization via defaultAttrs.</li>
+<li><strong>Initialization</strong>: Special events that are triggered after initialization.</li>
+</ul>
+
+
+<h4>Don&rsquo;t test</h4>
+
+<ul>
+<li><strong>Methods</strong>: The internal methods that are called when listening or triggering events.</li>
+<li><strong>Internal state</strong>: Any component state that is not part of the <code>this.attr</code> property.</li>
+</ul>
+
+
+<h3>Setup</h3>
+
+<p>In this case we are going to be using jasmine-flight, you might want to go and <a href="https://github.com/flightjs/jasmine-flight#getting-started">set it up</a>.</p>
+
+<h2>Testing data components</h2>
+
+<p>Some important things to remember about data components are:</p>
+
+<ul>
+<li>Don&rsquo;t test anything related with the DOM.</li>
+<li>They shouldn&rsquo;t know about the UI structure.</li>
+</ul>
+
+
+<p>We have a <code>data/items.js</code> which simulates a backend, it adds/removes to-do items and serves them.</p>
+
+<p>This components is basically doing three things.</p>
+
+<ul>
+<li>Listens to the <code>uiNewItemAction</code> event, adds the new item to the list and triggers <code>dataItems</code> to notify that the items were updated.</li>
+<li>Listens to the <code>uiRemoveItemAction</code> event, removes the selected item from the list and triggers <code>dataItems</code> to notify that the items were updated.</li>
+<li>Triggers the <code>dataItems</code> after initialization to notify components about the initial to-do items.</li>
+</ul>
+
+
+<p>For the sake of simplicity we are going to save the to-do items in an array, but our tests will never know about that, so we can modify it to save on local-storage or in the backend without altering the tests too much.</p>
+
+<p><em>NOTE: For a more robust storage component see <a href="https://github.com/cameronhunter/flight-storage">flight-storage</a>.</em></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>data/items.js </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">define</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">require</span><span class="p">)</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">use</span> <span class="nx">strict</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;;</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="kd">var</span> <span class="nx">defineComponent</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">flight</span><span class="o">/</span><span class="nx">lib</span><span class="o">/</span><span class="nx">component</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;);</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="k">return</span> <span class="nx">defineComponent</span><span class="p">(</span><span class="nx">items</span><span class="p">);</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="kd">function</span> <span class="nx">items</span><span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="k">this</span><span class="p">.</span><span class="nx">defaultAttrs</span><span class="p">({</span>
+</span><span class='line'>  <span class="nx">todoItems</span><span class="o">:</span> <span class="p">[]</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">this</span><span class="p">.</span><span class="nx">createItem</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">attr</span><span class="p">.</span><span class="nx">todoItems</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">item</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">triggerDataItems</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">this</span><span class="p">.</span><span class="nx">removeItem</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">attr</span><span class="p">.</span><span class="nx">todoItems</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">attr</span><span class="p">.</span><span class="nx">todoItems</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">item</span> <span class="o">!=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">item</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">triggerDataItems</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">this</span><span class="p">.</span><span class="nx">triggerDataItems</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;dataItems&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">items</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">attr</span><span class="p">.</span><span class="nx">todoItems</span> <span class="p">});</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">this</span><span class="p">.</span><span class="nx">after</span><span class="p">(</span><span class="s1">&#39;initialize&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;uiNewItemAction&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">createItem</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;uiRemoveItemAction&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">removeItem</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">triggerDataItems</span><span class="p">();</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">}</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>spec/data/items.spec.js &mdash;&ndash; TEST FILE </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">use</span> <span class="nx">strict</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;;</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">describeComponent</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">component</span><span class="o">/</span><span class="nx">data</span><span class="o">/</span><span class="nx">items</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="nx">describe</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">Initialization</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nx">it</span><span class="p">(</span><span class="s1">&#39;triggers dataItems with the initial todo items&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">eventSpy</span> <span class="o">=</span> <span class="nx">spyOnEvent</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;dataItems&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="nx">setupComponent</span><span class="p">({</span> <span class="nx">todoItems</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;old item&quot;</span><span class="p">]</span> <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">expect</span><span class="p">(</span><span class="nx">eventSpy</span><span class="p">).</span><span class="nx">toHaveBeenTriggeredOnAndWith</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">items</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;old item&quot;</span><span class="p">]</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">});</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="nx">describe</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">Listeners</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nx">beforeEach</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">setupComponent</span><span class="p">({</span> <span class="nx">todoItems</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;item 1&quot;</span><span class="p">,</span> <span class="s2">&quot;item 2&quot;</span><span class="p">]</span> <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;Listens to uiNewItemAction&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;and triggers dataItems with current item and the new one&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">eventSpy</span> <span class="o">=</span> <span class="nx">spyOnEvent</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;dataItems&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">component</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;uiNewItemAction&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">item</span><span class="o">:</span> <span class="s2">&quot;new item&quot;</span><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">expect</span><span class="p">(</span><span class="nx">eventSpy</span><span class="p">).</span><span class="nx">toHaveBeenTriggeredOnAndWith</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">items</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;item 1&quot;</span><span class="p">,</span> <span class="s2">&quot;item 2&quot;</span><span class="p">,</span> <span class="s2">&quot;new item&quot;</span><span class="p">]</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;Listens to uiRemoveItemAction&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;and triggers dataItems without the selected item&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">eventSpy</span> <span class="o">=</span> <span class="nx">spyOnEvent</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;dataItems&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">component</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;uiRemoveItemAction&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">item</span><span class="o">:</span> <span class="s2">&quot;item 2&quot;</span><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">expect</span><span class="p">(</span><span class="nx">eventSpy</span><span class="p">).</span><span class="nx">toHaveBeenTriggeredOnAndWith</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">items</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;item 1&quot;</span><span class="p">]</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">});</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Lets break down this test file and walkthough it.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>describeComponent </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">use</span> <span class="nx">strict</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;;</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">describeComponent</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">component</span><span class="o">/</span><span class="nx">data</span><span class="o">/</span><span class="nx">items</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="c1">// more code</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><a href="https://github.com/flightjs/jasmine-flight#components">describeComponent</a> receives the path of the component that is going to be tested.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Initialization </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">Initialization</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">it</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">triggers</span> <span class="nx">dataItems</span> <span class="kd">with</span> <span class="nx">the</span> <span class="nx">initial</span> <span class="nx">todo</span> <span class="nx">items</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="kd">var</span> <span class="nx">eventSpy</span> <span class="o">=</span> <span class="nx">spyOnEvent</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;dataItems&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">setupComponent</span><span class="p">({</span> <span class="nx">todoItems</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;old item&quot;</span><span class="p">]</span> <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">expect</span><span class="p">(</span><span class="nx">eventSpy</span><span class="p">).</span><span class="nx">toHaveBeenTriggeredOnAndWith</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">items</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;old item&quot;</span><span class="p">]</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><a href="https://github.com/flightjs/jasmine-flight#event-spy">spyOnEvent</a> works for events in the same way that Jasmine&rsquo;s <a href="http://pivotal.github.io/jasmine/#section-Spies">spyOn</a> works for functions.</p>
+
+<p><a href="https://github.com/flightjs/jasmine-flight#setupcomponent">setupComponent</a> creates an instance of the component, it also sets the instance to <code>this.component</code>. You can pass an object to <code>setupComponent</code> and it will be set as the <code>defaultAttrs</code>.</p>
+
+<p>For this test we are spying on the event that we expect to be triggered, instantiating the components and making sure that the event was triggered with the appropriate data (the items in the to-do list).</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Adding new to-do items </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">Listeners</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="nx">beforeEach</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nx">setupComponent</span><span class="p">({</span> <span class="nx">todoItems</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;item 1&quot;</span><span class="p">,</span> <span class="s2">&quot;item 2&quot;</span><span class="p">]</span> <span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">});</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="nx">describe</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">Listens</span> <span class="nx">to</span> <span class="nx">uiNewItemAction</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nx">it</span><span class="p">(</span><span class="s1">&#39;and triggers dataItems with current item and the new one&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">eventSpy</span> <span class="o">=</span> <span class="nx">spyOnEvent</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;dataItems&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">component</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;uiNewItemAction&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">item</span><span class="o">:</span> <span class="s2">&quot;new item&quot;</span><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">expect</span><span class="p">(</span><span class="nx">eventSpy</span><span class="p">).</span><span class="nx">toHaveBeenTriggeredOnAndWith</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">items</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;item 1&quot;</span><span class="p">,</span> <span class="s2">&quot;item 2&quot;</span><span class="p">,</span> <span class="s2">&quot;new item&quot;</span><span class="p">]</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">});</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="c1">// more code</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>This test makes sure that the user is able to successfully add new items to the list. We are going to be sharing the call to <code>setupComponent</code> for both tests.</p>
+
+<p>For this test we are spying on the <code>dataItems</code> event and expecting it to be triggered with the two original items (item 1, item 2) and the &ldquo;new item&rdquo; after the <code>uiNewItemAction</code> event is triggered.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Removing to-do items </span></figcaption>
+ <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">Listeners</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="nx">beforeEach</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nx">setupComponent</span><span class="p">({</span> <span class="nx">todoItems</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;item 1&quot;</span><span class="p">,</span> <span class="s2">&quot;item 2&quot;</span><span class="p">]</span> <span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">});</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="c1">// more code&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="nx">describe</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">Listens</span> <span class="nx">to</span> <span class="nx">uiRemoveItemAction</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">pre</span><span class="o">&gt;&lt;</span><span class="nx">code</span><span class="o">&gt;</span><span class="nx">it</span><span class="p">(</span><span class="s1">&#39;and triggers dataItems without the selected item&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">eventSpy</span> <span class="o">=</span> <span class="nx">spyOnEvent</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;dataItems&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">this</span><span class="p">.</span><span class="nx">component</span><span class="p">.</span><span class="nx">trigger</span><span class="p">(</span><span class="s1">&#39;uiRemoveItemAction&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">item</span><span class="o">:</span> <span class="s2">&quot;item 2&quot;</span><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">expect</span><span class="p">(</span><span class="nx">eventSpy</span><span class="p">).</span><span class="nx">toHaveBeenTriggeredOnAndWith</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">items</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;item 1&quot;</span><span class="p">]</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>This test is opposite of the previous one, it test the removal of items from the list.</p>
+
+<h1>Conclusion</h1>
+
+<p>Note how we never tested any method inside the component; we don&rsquo;t know anything about its internal structure. This makes refactoring the internals really simple, because no test is bounded to implementation. Actually we don&rsquo;t even know or care where the items are being saved, they might be saved on localStorage, cookies, in-memory, etc.</p>
+]]></content>
+  </entry>
+  
+</feed>
