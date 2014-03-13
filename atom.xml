@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Learn Flight.js]]></title>
-  <link href="http://learnflight.github.io/atom.xml" rel="self"/>
-  <link href="http://learnflight.github.io/"/>
-  <updated>2014-03-12T23:14:13-07:00</updated>
-  <id>http://learnflight.github.io/</id>
+  <link href="http://learnflight.io/atom.xml" rel="self"/>
+  <link href="http://learnflight.io/"/>
+  <updated>2014-03-13T00:07:30-07:00</updated>
+  <id>http://learnflight.io/</id>
   <author>
     <name><![CDATA[Rogelio Guzman]]></name>
     <email><![CDATA[chinog9@gmail.com]]></email>
@@ -15,12 +15,10 @@
   
   <entry>
     <title type="html"><![CDATA[How to integrate Flight into an existing Javascript application]]></title>
-    <link href="http://learnflight.github.io/blog/2014/03/01/how-to-integrate-flight-into-an-existing-javascript-application/"/>
-    <updated>2014-03-01T12:56:00-08:00</updated>
-    <id>http://learnflight.github.io/blog/2014/03/01/how-to-integrate-flight-into-an-existing-javascript-application</id>
-    <content type="html"><![CDATA[<p>How to integrate Flight into an exisiting Javascript application.</p>
-
-<p>One of the best things about Flight is that it plays well with exisiting apps. This means that you don&rsquo;t need to migrate your whole app at once.
+    <link href="http://learnflight.io/blog/2014/03/14/how-to-integrate-flight-into-an-existing-javascript-application/"/>
+    <updated>2014-03-14T12:56:00-07:00</updated>
+    <id>http://learnflight.io/blog/2014/03/14/how-to-integrate-flight-into-an-existing-javascript-application</id>
+    <content type="html"><![CDATA[<p>One of the best things about Flight is that it plays well with exisiting apps. This means that you don&rsquo;t need to migrate your whole app at once.
 Because flight components can&rsquo;t communicate directly with the outside world, you can gradually migrate new components without affecting the rest of the application.</p>
 
 <p>For this example we are going to use a Color Raffle application, this app consists of three basic parts:</p>
@@ -363,9 +361,9 @@ So, lets replace the call to <code>updateColorStat</code> and trigger an event, 
   
   <entry>
     <title type="html"><![CDATA[Testing a Flight data component]]></title>
-    <link href="http://learnflight.github.io/blog/2013/10/01/testing-a-flight-data-component/"/>
+    <link href="http://learnflight.io/blog/2013/10/01/testing-a-flight-data-component/"/>
     <updated>2013-10-01T09:53:00-07:00</updated>
-    <id>http://learnflight.github.io/blog/2013/10/01/testing-a-flight-data-component</id>
+    <id>http://learnflight.io/blog/2013/10/01/testing-a-flight-data-component</id>
     <content type="html"><![CDATA[<p>Testing components in Flight is damn fun. This is because, by nature, they are fully encapsulated and decoupled from the rest of your application.</p>
 
 <p>As of today the best way of testing Flight is with <a href="https://github.com/flightjs/jasmine-flight">jasmine-flight</a> or <a href="https://github.com/flightjs/mocha-flight">mocha-flight</a>, which are extensions to Jasmine and Mocha respectively.</p>
@@ -748,12 +746,12 @@ So, lets replace the call to <code>updateColorStat</code> and trigger an event, 
   
   <entry>
     <title type="html"><![CDATA[How to create a menu with Flight.js]]></title>
-    <link href="http://learnflight.github.io/blog/2013/09/18/how-to-create-a-menu-with-flight-dot-js/"/>
+    <link href="http://learnflight.io/blog/2013/09/18/how-to-create-a-menu-with-flight-dot-js/"/>
     <updated>2013-09-18T15:56:00-07:00</updated>
-    <id>http://learnflight.github.io/blog/2013/09/18/how-to-create-a-menu-with-flight-dot-js</id>
+    <id>http://learnflight.io/blog/2013/09/18/how-to-create-a-menu-with-flight-dot-js</id>
     <content type="html"><![CDATA[<p>We are going to create a simple navigation menu with <a href="http://flightjs.github.io/">Flight.js</a>. The purpose of this post is to illustrate a practical Flight.js example. Here are the <a href="https://github.com/flightjs/flight/tree/master/doc">docs</a> and the <a href="https://github.com/flightjs/flight">github page</a> if you want to check them out.</p>
 
-<p><img class="center" src="http://learnflight.github.io/images/navigation-menu.png"></p>
+<p><img class="center" src="http://learnflight.io/images/navigation-menu.png"></p>
 
 <p><a href="https://github.com/rogeliog/learn-flight-navigation-menu-demo/tree/master/app">View source</a> or <a href="http://rogeliog.github.io/learn-flight-navigation-menu-demo">Live demo</a>.</p>
 

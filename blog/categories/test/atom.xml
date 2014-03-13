@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Test | Learn Flight.js]]></title>
-  <link href="http://learnflight.github.io/blog/categories/test/atom.xml" rel="self"/>
-  <link href="http://learnflight.github.io/"/>
-  <updated>2014-03-12T23:14:13-07:00</updated>
-  <id>http://learnflight.github.io/</id>
+  <link href="http://learnflight.io/blog/categories/test/atom.xml" rel="self"/>
+  <link href="http://learnflight.io/"/>
+  <updated>2014-03-13T00:07:30-07:00</updated>
+  <id>http://learnflight.io/</id>
   <author>
     <name><![CDATA[Rogelio Guzman]]></name>
     <email><![CDATA[chinog9@gmail.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Testing a Flight data component]]></title>
-    <link href="http://learnflight.github.io/blog/2013/10/01/testing-a-flight-data-component/"/>
+    <link href="http://learnflight.io/blog/2013/10/01/testing-a-flight-data-component/"/>
     <updated>2013-10-01T09:53:00-07:00</updated>
-    <id>http://learnflight.github.io/blog/2013/10/01/testing-a-flight-data-component</id>
+    <id>http://learnflight.io/blog/2013/10/01/testing-a-flight-data-component</id>
     <content type="html"><![CDATA[<p>Testing components in Flight is damn fun. This is because, by nature, they are fully encapsulated and decoupled from the rest of your application.</p>
 
 <p>As of today the best way of testing Flight is with <a href="https://github.com/flightjs/jasmine-flight">jasmine-flight</a> or <a href="https://github.com/flightjs/mocha-flight">mocha-flight</a>, which are extensions to Jasmine and Mocha respectively.</p>
