@@ -1,12 +1,10 @@
 ---
 layout: post
 title: "How to integrate Flight into an existing Javascript application"
-date: 2014-03-01 12:56
+date: 2014-03-14 12:56
 comments: true
-categories:
+categories: [Getting Started, Twitter Flight]
 ---
-
-How to integrate Flight into an exisiting Javascript application.
 
 One of the best things about Flight is that it plays well with exisiting apps. This means that you don't need to migrate your whole app at once.
 Because flight components can't communicate directly with the outside world, you can gradually migrate new components without affecting the rest of the application.
@@ -18,6 +16,8 @@ For this example we are going to use a Color Raffle application, this app consis
 3. **History:** Every time a color is selected, it will be added to the history wall.
 
 NOTE: We will not go thought the process [setting up Flight and its depencencies](https://github.com/flightjs/flight#installation), but it is a really easy process. For simplicity we are going to use the Flight [standalone](https://github.com/flightjs/flight#standalone-version) version.
+
+{% img center small /images/color-raffle.png %}
 
 [View Source](https://gist.github.com/rogeliog/9519964) or [Live Demo](http://rogeliog.github.io/learn-flight-color-raffle-demo)
 
