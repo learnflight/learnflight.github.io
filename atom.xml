@@ -4,7 +4,7 @@
   <title><![CDATA[Learn Flight.js]]></title>
   <link href="http://learnflight.io/atom.xml" rel="self"/>
   <link href="http://learnflight.io/"/>
-  <updated>2014-03-13T13:16:20-07:00</updated>
+  <updated>2014-03-13T13:17:52-07:00</updated>
   <id>http://learnflight.io/</id>
   <author>
     <name><![CDATA[Rogelio Guzman]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[How to integrate Flight into an existing Javascript application]]></title>
-    <link href="http://learnflight.io/blog/2014/03/14/how-to-integrate-flight-into-an-existing-javascript-application/"/>
-    <updated>2014-03-14T12:56:00-07:00</updated>
-    <id>http://learnflight.io/blog/2014/03/14/how-to-integrate-flight-into-an-existing-javascript-application</id>
+    <link href="http://learnflight.io/blog/2014/03/13/how-to-integrate-flight-into-an-existing-javascript-application/"/>
+    <updated>2014-03-13T12:56:00-07:00</updated>
+    <id>http://learnflight.io/blog/2014/03/13/how-to-integrate-flight-into-an-existing-javascript-application</id>
     <content type="html"><![CDATA[<p>One of the best things about Flight is that it plays well with exisiting apps. This means that you don&rsquo;t need to migrate your whole app at once.
 Because flight components can&rsquo;t communicate directly with the outside world, you can gradually migrate new components without affecting the rest of the application.</p>
 
