@@ -21,6 +21,8 @@ NOTE: We will not go thought the process [setting up Flight and its depencencies
 
 [View Source](https://gist.github.com/rogeliog/9519964) or [Live Demo](http://rogeliog.github.io/learn-flight-color-raffle-demo)
 
+<!-- more -->
+
 {% codeblock application.js lang:js %}
 $(function () {
 
@@ -232,3 +234,5 @@ You can find the full code [here](https://gist.github.com/rogeliog/9519964).
 So, what have we achieved? We have divided the responsibilities across different components that are completely decoupled from each other. Scaling this app is now easier and more maintainable due to the modular nature of Flight.
 
 The three components are UI components, but in the next post we are going to see how to extract a data component that handles all the data logic and provide it to the ui components.
+
+*NOTE: English is not my native language, I'll be more than happy to receive any grammar or spelling corrections :)*
