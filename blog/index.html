@@ -1,0 +1,325 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Learn Flight.js</title>
+  <meta name="author" content="Rogelio Guzman">
+
+  
+  <meta name="description" content="How to integrate Flight into an existing JavaScript application Mar 13th, 2014 Getting Started Twitter Flight One of the best things about Flight is &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://learnflight.io/blog/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/extra.css" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Learn Flight.js" type="application/atom+xml">
+  <link href='http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-8991233-7']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <div class="content">
+    <div id="logo">
+      <img src="/images/flight-logo.png" />
+      <div class="clear"></div>
+    </div>
+    <h1><a href="/">Learn Flight.js</a></h1>
+    <div class="clear"></div>
+  </div>
+</hgroup>
+
+<ul class="social-menu top-right-corner">
+  <li class="social-menu-item"><a href="http://twitter.com/rogeliog"><img src="/images/twitter-logo.png" /></a></li>
+</ul>
+
+</header>
+  <div id="main">
+    <div id="content">
+      
+
+
+  
+  <article class="listing">
+    <header>
+  
+  <h1 class="beta">
+    <a href="/blog/2014/03/13/how-to-integrate-flight-into-an-existing-javascript-application/">How to integrate Flight into an existing JavaScript application</a>
+  </h1>
+  
+
+  
+  <div class="meta clearfix">
+    
+
+
+
+
+
+
+
+
+  
+
+
+<time class="pull-left" datetime="2014-03-13T12:56:00-07:00" pubdate data-updated="true"><i class="icon-calendar"></i> Mar 13<span>th</span>, 2014</time>
+    
+
+
+
+  
+  <div class="pull-left">
+    <i class="icon-tags"></i>
+    <ul class="tags unstyled">
+    
+      <li><a href="/blog/categories/Getting Started/">Getting Started</a></li>
+    
+      <li><a href="/blog/categories/Twitter Flight/">Twitter Flight</a></li>
+    
+    </ul>
+  </div>
+  
+
+    
+  </div>
+  
+</header>
+
+
+
+
+<div class="entry-content clearfix">
+  <p>One of the best things about Flight is that it plays well with exisiting apps. This means that you don&rsquo;t need to migrate your whole app at once.
+Because flight components can&rsquo;t communicate directly with the outside world, you can gradually migrate new components without affecting the rest of the application.</p>
+
+<p>For this example we are going to use a Color Raffle application, this app consists of three basic parts:</p>
+
+<ol>
+<li><strong>Raffle button:</strong> Picks a random color whenever it is clicked.</li>
+<li><strong>Color Stats:</strong> Each of the color stats will update everytime that given color comes out of the raffle.</li>
+<li><strong>History:</strong> Every time a color is selected, it will be added to the history wall.</li>
+</ol>
+
+
+<p>NOTE: We will not go through the process <a href="https://github.com/flightjs/flight#installation">setting up Flight and its depencencies</a>, but it is a really easy process. For simplicity we are going to use the Flight <a href="https://github.com/flightjs/flight#standalone-version">standalone</a> version.</p>
+
+<p><img class="center small" src="/images/color-raffle.png"></p>
+
+<p><a href="https://gist.github.com/rogeliog/9519964">View Source</a> or <a href="http://rogeliog.github.io/learn-flight-color-raffle-demo">Live Demo</a></p>
+
+
+  <a class="btn pull-right" href="/blog/2014/03/13/how-to-integrate-flight-into-an-existing-javascript-application/">Read on &rarr;</a>
+</div>
+
+  </article>
+  <hr>
+
+  
+  <article class="listing">
+    <header>
+  
+  <h1 class="beta">
+    <a href="/blog/2013/10/01/testing-a-flight-data-component/">Testing a Flight data component</a>
+  </h1>
+  
+
+  
+  <div class="meta clearfix">
+    
+
+
+
+
+
+
+
+
+  
+
+
+<time class="pull-left" datetime="2013-10-01T09:53:00-07:00" pubdate data-updated="true"><i class="icon-calendar"></i> Oct 1<span>st</span>, 2013</time>
+    
+
+
+
+  
+  <div class="pull-left">
+    <i class="icon-tags"></i>
+    <ul class="tags unstyled">
+    
+      <li><a href="/blog/categories/Data Component/">Data Component</a></li>
+    
+      <li><a href="/blog/categories/Test/">Test</a></li>
+    
+      <li><a href="/blog/categories/Twitter Flight/">Twitter Flight</a></li>
+    
+    </ul>
+  </div>
+  
+
+    
+  </div>
+  
+</header>
+
+
+
+
+<div class="entry-content clearfix">
+  <p>Testing components in Flight is damn fun. This is because, by nature, they are fully encapsulated and decoupled from the rest of your application.</p>
+
+<p>As of today the best way of testing Flight is with <a href="https://github.com/flightjs/jasmine-flight">jasmine-flight</a> or <a href="https://github.com/flightjs/mocha-flight">mocha-flight</a>, which are extensions to Jasmine and Mocha respectively.</p>
+
+<p>For this post we are going to use a really simple to-do app. A to-do app will generally need a component that handles the data, which has the responsibility of adding/removing items, and notifying other components about that.</p>
+
+<h2>Flight testing principles (optional)</h2>
+
+<p>Flight components communicate via events, so we are going focus on testing only events and not the methods inside the component.</p>
+
+<p>Here is a general rule of thumb for testing a Flight component.</p>
+
+
+  <a class="btn pull-right" href="/blog/2013/10/01/testing-a-flight-data-component/">Read on &rarr;</a>
+</div>
+
+  </article>
+  <hr>
+
+  
+  <article class="listing">
+    <header>
+  
+  <h1 class="beta">
+    <a href="/blog/2013/09/18/how-to-create-a-menu-with-flight-dot-js/">How to create a menu with Flight.js</a>
+  </h1>
+  
+
+  
+  <div class="meta clearfix">
+    
+
+
+
+
+
+
+
+
+  
+
+
+<time class="pull-left" datetime="2013-09-18T15:56:00-07:00" pubdate data-updated="true"><i class="icon-calendar"></i> Sep 18<span>th</span>, 2013</time>
+    
+
+
+
+  
+  <div class="pull-left">
+    <i class="icon-tags"></i>
+    <ul class="tags unstyled">
+    
+      <li><a href="/blog/categories/Getting Started/">Getting Started</a></li>
+    
+      <li><a href="/blog/categories/Twitter Flight/">Twitter Flight</a></li>
+    
+    </ul>
+  </div>
+  
+
+    
+  </div>
+  
+</header>
+
+
+
+
+<div class="entry-content clearfix">
+  <p>We are going to create a simple navigation menu with <a href="http://flightjs.github.io/">Flight.js</a>. The purpose of this post is to illustrate a practical Flight.js example. Here are the <a href="https://github.com/flightjs/flight/tree/master/doc">docs</a> and the <a href="https://github.com/flightjs/flight">github page</a> if you want to check them out.</p>
+
+<p><img class="center" src="/images/navigation-menu.png"></p>
+
+<p><a href="https://github.com/rogeliog/learn-flight-navigation-menu-demo/tree/master/app">View source</a> or <a href="http://rogeliog.github.io/learn-flight-navigation-menu-demo">Live demo</a>.</p>
+
+
+  <a class="btn pull-right" href="/blog/2013/09/18/how-to-create-a-menu-with-flight-dot-js/">Read on &rarr;</a>
+</div>
+
+  </article>
+  <hr>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Rogelio Guzman -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'learnflight';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
